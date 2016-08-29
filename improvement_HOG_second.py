@@ -97,14 +97,14 @@ def improvementHOG(image):
             quadratic_value = 15
             # セル拡張のための横幅と縦幅を２次関数に近似して求める
             cell_height = 1#int(math.fabs((2*HEIGHT/WIDTH**2)*(pixel_x-WIDTH/2)**2)/CELL_SIZE/quadratic_value)
-            cell_width = int(math.fabs((2*WIDTH/HEIGHT**2)*(pixel_y-HEIGHT/2)**2)/CELL_SIZE/quadratic_value)
+            cell_width = int(math.fabs((2*WIDTH/(HEIGHT**2))*(pixel_y-HEIGHT/2)**2)/CELL_SIZE/quadratic_value)
             # 0の時(頂点付近はセル幅を1にして通常計算を行う)
             if cell_width == 0:
                 cell_width = 1
             if cell_height == 0:
                 cell_height = 1
             # 拡張したセルが画像のサイズを超えている場合、通常のHOGと同じように計算を行う(とりあえずの処置)
-            if pixel_x - CELL_SIZE*cell_width +1 < 0 or pixel_y - CELL_SIZE+cell_height +1 < 0:
+            if pixel_x - CELL_SIZE*cell_width +1 < 0 or pixel_y - CELL_SIZE*cell_height +1 < 0:
                 for y in range(CELL_SIZE):
                     for x in range(CELL_SIZE):
                         for angle in range(9):
