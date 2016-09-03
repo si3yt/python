@@ -25,7 +25,7 @@ def printHOG(image):
     WIDTH = image.shape[1]
 
     # branck result image
-    result = np.zeros((WIDTH, HEIGHT, 3), np.uint8)
+    result = np.zeros((HEIGHT, WIDTH, 3), np.uint8)
 
     ## 画像のグレースケール化(色バリエーションの最小化)
     GRAY = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
