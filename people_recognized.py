@@ -19,13 +19,15 @@ import print_HOG as printHOG
 import learning_SVM as SVM
 import improvement_HOG as impHOG
 import improvement_HOG_second as impHOGsnd
+import improvement_HOG_third as impHOGtrd
 
 ### main
 if __name__ == "__main__":
 
     imgSample = cv2.imread('./image/sample2.jpg')
 
-    impHOGsnd.improvementHOG(imgSample)
+    #impHOGsnd.improvementHOG(imgSample)
+    impHOGtrd.improvementHOG(imgSample)
 
     #printHOG.printHOG(imgSample)
     #impHOG.improvementHOG(imgSample)

@@ -80,55 +80,37 @@ def improvementHOG(image):
     hist = [[[0 for i in range(BINS)] for j in range(CELL_NAMBER_X)] for k in range(CELL_NAMBER_Y)]
     # 取得できているセル用ラベル配列
     get_cell_label = [[0 for j in range(CELL_NAMBER_X)] for k in range(CELL_NAMBER_Y)]
-    # 拡張セルにおいて検索済みセル用ラベル配列
-    search_cell_label = [[0 for j in range(CELL_NAMBER_X)] for k in range(CELL_NAMBER_Y)]
-
     # 取得してきたhistを格納するためのindex
     get_cell_y = int(CELL_NAMBER_Y/2)
     get_cell_x = int(CELL_NAMBER_X/2)
     # 左上領域の探索
-    for cell_y in range(int(CELL_NAMBER_Y/2),-1,-1):
-        for cell_x in range(int(CELL_NAMBER_X/2),-1,-1):
-            # セル内の対応するピクセルを求める
-            pixel_x = cell_x * CELL_SIZE + (CELL_SIZE - 1)
-            pixel_y = cell_y * CELL_SIZE + (CELL_SIZE - 1)
+    for pixel_y in range(int(HEIGHT/2),-1,-CELL_SIZE):
+        pixel_x_plus = -CELL_SIZE
+        pixel_x = int(WIDTH/2)
+        while (pixel_x >= 0):
             # セル内ヒストグラムの作成
             # 二次関数の値縮小用変数
-            quadratic_value = 15
+            quadratic_value = 30
             # セル拡張のための横幅と縦幅を２次関数に近似して求める
-            cell_height = 1#int(math.fabs((2*HEIGHT/WIDTH**2)*(pixel_x-WIDTH/2)**2)/CELL_SIZE/quadratic_value)
-            cell_width = int(math.fabs((2*WIDTH/(HEIGHT**2))*(pixel_y-HEIGHT/2)**2)/CELL_SIZE/quadratic_value)
-            # 0の時(頂点付近はセル幅を1にして通常計算を行う)
-            if cell_width == 0:
-                cell_width = 1
-            if cell_height == 0:
-                cell_height = 1
-            # 拡張したセルが画像のサイズを超えている場合、通常のHOGと同じように計算を行う(とりあえずの処置)
-            if pixel_x - CELL_SIZE*cell_width +1 < 0 or pixel_y - CELL_SIZE*cell_height +1 < 0:
-                for y in range(CELL_SIZE):
-                    for x in range(CELL_SIZE):
-                        for angle in range(9):
-                            angle = int(gradient[pixel_x+x][pixel_y+y]/20)
-                            hist[cell_y][cell_x][angle] += magnitude[pixel_x+x][pixel_y+y]
+            cell_height = 1
+            cell_width = int((-pixel_y + WIDTH/2)/quadratic_value) #int(math.fabs((2*WIDTH/(HEIGHT**2))*(pixel_y-HEIGHT/2)**2)/CELL_SIZE/quadratic_value)
             # 拡張したセルが画像のサイズ内に収まる場合、拡張を行って計算を行う
-            elif search_cell_label[cell_y][cell_x] != True:
-                # 検索対象セルを検索済みにする
-                for y in range(cell_y-cell_height+1,cell_y+1,1):
-                    for x in range(cell_x-cell_width+1,cell_x+1,1):
-                        search_cell_label[y][x] = True
+            if pixel_x - (CELL_SIZE+cell_width) >= 0 and pixel_y - (CELL_SIZE+cell_height) >= 0:
                 while(True):
                     if get_cell_label[get_cell_y][get_cell_x] == True:
                         get_cell_x -= 1
                     else:
                         break
                 # 拡張セルのサイズ内でヒストグラムを作成
-                for y in range(CELL_SIZE*cell_height):
-                    for x in range(CELL_SIZE*cell_width):
+                for y in range(CELL_SIZE+cell_height):
+                    for x in range(CELL_SIZE+cell_width):
                         angle = int(gradient[pixel_x-x][pixel_y-y]/20)
                         # 投票するときにセル数で割ることで正規化を行う
-                        hist[get_cell_y][get_cell_x][angle] += magnitude[pixel_x-x][pixel_y-y]/((cell_height)*(cell_width))
+                        ratio = (CELL_SIZE**2) / ((CELL_SIZE+cell_width)*(CELL_SIZE+cell_height))
+                        hist[get_cell_y][get_cell_x][angle] += magnitude[pixel_x-x][pixel_y-y]#*ratio#/((cell_height)*(cell_width))
                         get_cell_label[get_cell_y][get_cell_x] = True
                 get_cell_x = get_cell_x - 1
+            pixel_x -= CELL_SIZE + cell_width
         get_cell_y = get_cell_y - 1
         get_cell_x = int(CELL_NAMBER_X/2)
 
