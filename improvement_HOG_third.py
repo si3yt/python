@@ -68,7 +68,7 @@ def improvementHOG(image):
             if gradient[x][y] == 180.0:
                 gradient[x][y] = 179
 
-    ## セル領域分割 (5 x 5)
+    ## セル領域分割
     ## ヒストグラム構築(方向20度毎の9次元ベクトル)
     # ヒストグラムのbin数
     BINS = 9
@@ -93,7 +93,7 @@ def improvementHOG(image):
             quadratic_value = 30
             # セル拡張のための横幅と縦幅を２次関数に近似して求める
             cell_height = 1
-            cell_width = int((-pixel_y + WIDTH/2)/quadratic_value) #int(math.fabs((2*WIDTH/(HEIGHT**2))*(pixel_y-HEIGHT/2)**2)/CELL_SIZE/quadratic_value)
+            cell_width = int((-pixel_y + WIDTH/2)/quadratic_value)#int(math.fabs((2*WIDTH/(HEIGHT**2))*(pixel_y-HEIGHT/2)**2)/quadratic_value)
             # 拡張したセルが画像のサイズ内に収まる場合、拡張を行って計算を行う
             if pixel_x - (CELL_SIZE+cell_width) >= 0 and pixel_y - (CELL_SIZE+cell_height) >= 0:
                 while(True):

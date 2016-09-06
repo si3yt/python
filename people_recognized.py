@@ -27,7 +27,7 @@ if __name__ == "__main__":
     imgSample = cv2.imread('./image/sample2.jpg')
 
     #impHOGsnd.improvementHOG(imgSample)
-    impHOGtrd.improvementHOG(imgSamaple)
+    impHOGtrd.improvementHOG(imgSample)
 
     #printHOG.printHOG(imgSample)
     #impHOG.improvementHOG(imgSample)

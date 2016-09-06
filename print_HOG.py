@@ -17,7 +17,7 @@ from skimage.transform import resize
 def printHOG(image):
 
     # property
-    CELL_SIZE = 5
+    CELL_SIZE = 20
     BLOCK_SIZE = 3
 
     # read image size
