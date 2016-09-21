@@ -74,7 +74,7 @@ if __name__ == "__main__":
     y = cross_y[cross_index]
     z = cross_z[cross_index]
 
-    print ("x = " + str(x) + ", y = " + str(y) + ", z = " + str(z))
+    # print ("x = " + str(x) + ", y = " + str(y) + ", z = " + str(z))
 
     ## xyz座標から緯度経度を求める
     # xyz座標　→ 極座標　変換
@@ -90,3 +90,5 @@ if __name__ == "__main__":
     ## 円筒展開
     cylinder_x = phi * r # 経度 * 球体半径
     cylinder_y = theta * r # 経度 * 球体半径
+
+    print ("x = " + str(cylinder_x) + ", y = " + str(cylinder_y))
