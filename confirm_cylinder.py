@@ -70,6 +70,23 @@ if __name__ == "__main__":
     if x - cross_x[0] > x - cross_x[1]:
         cross_index = 1
 
-    print ("x = " + str(cross_x[cross_index]) + ", y = " + str(cross_y[cross_index]) + ", z = " + str(cross_z[cross_index]))
+    x = cross_x[cross_index]
+    y = cross_y[cross_index]
+    z = cross_z[cross_index]
+
+    print ("x = " + str(x) + ", y = " + str(y) + ", z = " + str(z))
 
     ## xyz座標から緯度経度を求める
+    # xyz座標　→ 極座標　変換
+    # 原点からの距離 r(distance) = sqrt(x^2+y^2+z^2)
+    # z軸からの変換 θ = acos(z/sqrt(x^2+y^2+z^2))
+    # x軸からの変換 φ = atan(y/x)
+    distance = math.sqrt(x**2 + y**2 + z**2)
+    theta = math.acos(z/distance) # 値域:0~pi # 緯度
+    phi = math.atan2(y,x) # 値域:-pi~pi # 経度
+    if phi < 0:
+        phi = math.pi - phi # 値域:0~2pi
+
+    ## 円筒展開
+    cylinder_x = phi * r # 経度 * 球体半径
+    cylinder_y = theta * r # 経度 * 球体半径
