@@ -37,7 +37,16 @@ if __name__ == "__main__":
     #xy軸に対して垂直に立っている人
     #grid = [[200,200,250],[200,250,200],[200,210,150],[200,250,-200],[200,150,-200],[200,190,150],[200,150,200],[200,200,250]] # →xyz ↓index
     #カメラ(球体)に対して垂直に立っている人
-    grid = [[200,200,250],[150,250,200],[190,210,150],[150,250,-200],[250,150,-200],[210,190,150],[250,150,200],[200,200,250]] # →xyz ↓index
+    #grid = [[200,200,250],[200-25*math.sqrt(2),200+25*math.sqrt(2),200],[200-5*math.sqrt(2),200+5*math.sqrt(2),150],[200-25*math.sqrt(2),200+25*math.sqrt(2),-200],[200+25*math.sqrt(2),200-25*math.sqrt(2),-200],[200+5*math.sqrt(2),200-5*math.sqrt(2),150],[200+25*math.sqrt(2),200-25*math.sqrt(2),200],[200,200,250]] # →xyz ↓index
+    #xy軸に対して垂直に立っている人の顔が前のめりになっている
+    #grid = [[150,200,250],[150,250,200],[200,210,150],[200,250,-200],[200,150,-200],[200,190,150],[150,150,200],[150,200,250]] # →xyz ↓index
+    #カメラ(球体)に対して垂直に立っている人の顔が前のめりになっている
+    #grid = [[150,150,250],[150-25*math.sqrt(2),150+25*math.sqrt(2),200],[200-5*math.sqrt(2),200+5*math.sqrt(2),150],[200-25*math.sqrt(2),200+25*math.sqrt(2),-200],[200+25*math.sqrt(2),200-25*math.sqrt(2),-200],[200+5*math.sqrt(2),200-5*math.sqrt(2),150],[150+25*math.sqrt(2),150-25*math.sqrt(2),200],[150,150,250]] # →xyz ↓index
+    #xy軸に対して垂直に立っている人の顔が後ろのめりになっている
+    #grid = [[250,200,250],[250,250,200],[200,210,150],[200,250,-200],[200,150,-200],[200,190,150],[250,150,200],[250,200,250]] # →xyz ↓index
+    #カメラ(球体)に対して垂直に立っている人の顔が後ろのめりになっている
+    #grid = [[250,250,250],[250-25*math.sqrt(2),250+25*math.sqrt(2),200],[200-5*math.sqrt(2),200+5*math.sqrt(2),150],[200-25*math.sqrt(2),200+25*math.sqrt(2),-200],[200+25*math.sqrt(2),200-25*math.sqrt(2),-200],[200+5*math.sqrt(2),200-5*math.sqrt(2),150],[250+25*math.sqrt(2),250-25*math.sqrt(2),200],[250,250,250]] # →xyz ↓index
+
     cylinder = [[0 for i in range(2)] for j in range(len(grid))] # →xy ↓index
 
 
@@ -47,9 +56,6 @@ if __name__ == "__main__":
         x = grid[grid_i][0]
         y = grid[grid_i][1]
         z = grid[grid_i][2]
-
-        print ('print start')
-        print (x,y,z)
 
         a = (x**2 + y**2 + z**2)
         b = 0
@@ -94,8 +100,6 @@ if __name__ == "__main__":
         y = cross_y[cross_index]
         z = cross_z[cross_index]
 
-        print (x,y,z)
-
         ## xyz座標から緯度経度を求める
         # xyz座標　→ 極座標　変換
         # 原点からの距離 r(distance) = sqrt(x^2+y^2+z^2)
@@ -104,9 +108,7 @@ if __name__ == "__main__":
         distance = math.sqrt(x**2 + y**2 + z**2)
         theta = math.acos(z/distance) # 値域:0~pi # 緯度
         phi = math.atan2(y,x) # 値域:-pi~pi # 経度
-        print (phi)
-        if phi < 0:
-            phi = math.pi - phi # 値域:0~2pi
+        phi = math.fabs(phi - math.pi) # 値域:0~2pi
 
         ## 円筒展開
         cylinder_x = phi * r # 経度 * 球体半径
