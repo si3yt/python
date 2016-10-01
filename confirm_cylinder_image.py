@@ -21,8 +21,9 @@ if __name__ == "__main__":
 
     # 球体の方程式
     # x^2 + y^2 + z^2 = r^2
-    r = 100 #fish_radius
-
+    r = 200 #fish_radius
+    # グリッドの奥行き
+    depth = 500
     # 直線の公式
     # 媒介変数形式 (x,y,z) = (x1,y1,z1) + t(x2-x1,y2-y1,z-z1)
     # 変形 (x-x1)/(x2-x1) = (y-y1)/(y2-y1)=(z-z1)/(z2-z1)
@@ -34,8 +35,21 @@ if __name__ == "__main__":
     # t^2(x^2+y^2+z^2) = r^2
     # x = y = z = 2 # x,y,z = 実態の三次元座標
     # grid search xyz配列
+    # read image
+    image = cv2.imread('./image/grid.jpg')
+    height = image.shape[0]
+    width = image.shape[1]
+    grid_size = height * width # pixel数
+    grid = [[0 for i in range(3)] for j in range(grid_size)]
+    print ('Play make grid')
+    for h in range(height):
+        for w in range(width):
+            size_i = w + width * h
+            grid[size_i][0] = width  / 2 - w
+            grid[size_i][1] = depth
+            grid[size_i][2] = height / 2 - h
     #xy軸に対して垂直に立っている人
-    grid = [[200,200,250],[200,250,200],[200,210,150],[200,250,-200],[200,150,-200],[200,190,150],[200,150,200],[200,200,250]] # →xyz ↓index
+    #grid = [[200,200,250],[200,250,200],[200,210,150],[200,250,-200],[200,150,-200],[200,190,150],[200,150,200],[200,200,250]] # →xyz ↓index
     #カメラ(球体)に対して垂直に立っている人
     #grid = [[200,200,250],[200-25*math.sqrt(2),200+25*math.sqrt(2),200],[200-5*math.sqrt(2),200+5*math.sqrt(2),150],[200-25*math.sqrt(2),200+25*math.sqrt(2),-200],[200+25*math.sqrt(2),200-25*math.sqrt(2),-200],[200+5*math.sqrt(2),200-5*math.sqrt(2),150],[200+25*math.sqrt(2),200-25*math.sqrt(2),200],[200,200,250]] # →xyz ↓index
     #xy軸に対して垂直に立っている人の顔が前のめりになっている
@@ -52,12 +66,11 @@ if __name__ == "__main__":
 
     # grid search for
     for grid_i in range(len(grid)): # grid配列に入れられた要素をすべて検証
+        print ('Now play is for grid NO.' + str(grid_i))
         # 検索対象座標
         x = grid[grid_i][0]
         y = grid[grid_i][1]
         z = grid[grid_i][2]
-
-        print (grid_i,x,y,z)
 
         a = (x**2 + y**2 + z**2)
         b = 0
@@ -102,8 +115,6 @@ if __name__ == "__main__":
         y = cross_y[cross_index]
         z = cross_z[cross_index]
 
-        print (grid_i,x,y,z)
-
         ## xyz座標から緯度経度を求める
         # xyz座標　→ 極座標　変換
         # 原点からの距離 r(distance) = sqrt(x^2+y^2+z^2)
@@ -123,17 +134,18 @@ if __name__ == "__main__":
         cylinder[grid_i][0] = cylinder_x
         cylinder[grid_i][1] = cylinder_y
 
-    print (cylinder)
-
     # branck result image
     cylinder_height = int(math.pi * r)     # 緯度MAX = 180度 = pi
     cylinder_width  = int(math.pi * r * 2) # 経度MAX = 360度 = 2pi
     result = np.zeros((cylinder_height, cylinder_width, 3), np.uint8)
 
-    for i in range(len(cylinder)-1):
-        rp = (int(cylinder[i][0])   , int(cylinder[i][1]  )) # 一つ目の座標
-        lp = (int(cylinder[i+1][0]) , int(cylinder[i+1][1])) # 二つ目の座標
-        cv2.line(result, rp,lp,(255,255,255), 1)
+    print ('Play make result image')
+    for i in range(len(cylinder)):
+        h = int(i / width)
+        w = int(i % width)
+        result[cylinder[i][1]][cylinder[i][0]][0] = image[h][w][0]
+        result[cylinder[i][1]][cylinder[i][0]][1] = image[h][w][1]
+        result[cylinder[i][1]][cylinder[i][0]][2] = image[h][w][2]
 
     while True:
         gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
