@@ -23,7 +23,7 @@ if __name__ == "__main__":
     # x^2 + y^2 + z^2 = r^2
     r = 200 #fish_radius
     # グリッドの奥行き
-    depth = 500
+    depth = 400
     # 直線の公式
     # 媒介変数形式 (x,y,z) = (x1,y1,z1) + t(x2-x1,y2-y1,z-z1)
     # 変形 (x-x1)/(x2-x1) = (y-y1)/(y2-y1)=(z-z1)/(z2-z1)
@@ -63,76 +63,82 @@ if __name__ == "__main__":
 
     cylinder = [[0 for i in range(2)] for j in range(len(grid))] # →xy ↓index
 
-
+    print ('Now play is for grid')
     # grid search for
     for grid_i in range(len(grid)): # grid配列に入れられた要素をすべて検証
-        print ('Now play is for grid NO.' + str(grid_i))
-        # 検索対象座標
-        x = grid[grid_i][0]
-        y = grid[grid_i][1]
-        z = grid[grid_i][2]
+        #print ('Now play is for grid NO.' + str(grid_i))
+        h = int(grid_i / width)
+        w = int(grid_i % width)
+        if image[h][w][0] < 50:
+            # 検索対象座標
+            x = grid[grid_i][0]
+            y = grid[grid_i][1]
+            z = grid[grid_i][2]
 
-        a = (x**2 + y**2 + z**2)
-        b = 0
-        c = -(r**2)
-        t = [0]*2
-        real = imag = 0 # 虚部と実部の変数
+            a = (x**2 + y**2 + z**2)
+            b = 0
+            c = -(r**2)
+            t = [0]*2
+            real = imag = 0 # 虚部と実部の変数
 
-        # 判別式 D
-        d = b * b - 4 * a * c
+            # 判別式 D
+            d = b * b - 4 * a * c
 
-        # 判別式による条件分岐
-        if d > 0: # 球と直線(原点)の交点はこの計算のみが使われる
-            t[0] = (-b + math.sqrt(d)) / (2*a)
-            t[1] = (-b - math.sqrt(d)) / (2*a)
-        ## 以下は二次方程式用の式
-        elif d == 0:
-            t[0] = t[1] = -b / (2*a)
-        else: # bが0,cがマイナスの値をとるため入ることはない
-            real = -b / (2*a)
-            imag - math.sqrt(-d) / (2*a)
-            t[0].real = real
-            t[0].imag = imag
-            t[1].real = real
-            t[0].imag = -imag
+            # 判別式による条件分岐
+            if d > 0: # 球と直線(原点)の交点はこの計算のみが使われる
+                t[0] = (-b + math.sqrt(d)) / (2*a)
+                t[1] = (-b - math.sqrt(d)) / (2*a)
+            ## 以下は二次方程式用の式
+            elif d == 0:
+                t[0] = t[1] = -b / (2*a)
+            else: # bが0,cがマイナスの値をとるため入ることはない
+                real = -b / (2*a)
+                imag - math.sqrt(-d) / (2*a)
+                t[0].real = real
+                t[0].imag = imag
+                t[1].real = real
+                t[0].imag = -imag
 
-        # x,y,zを求める
-        cross_x = [0]*2
-        cross_y = [0]*2
-        cross_z = [0]*2
-        for i in range(len(t)):
-            cross_x[i] = x * t[i]
-            cross_y[i] = y * t[i]
-            cross_z[i] = z * t[i]
+            # x,y,zを求める
+            cross_x = [0]*2
+            cross_y = [0]*2
+            cross_z = [0]*2
+            for i in range(len(t)):
+                cross_x[i] = x * t[i]
+                cross_y[i] = y * t[i]
+                cross_z[i] = z * t[i]
 
-        # 注目点に近い点を採用する
-        # x,y,zのどれかが近い(差が少ない)場合、他の二つも近いと言える
-        cross_index = 0
-        if math.fabs(x - cross_x[0]) > math.fabs(x - cross_x[1]):
-            cross_index = 1
+            # 注目点に近い点を採用する
+            # x,y,zのどれかが近い(差が少ない)場合、他の二つも近いと言える
+            cross_index = 0
+            if math.fabs(x - cross_x[0]) > math.fabs(x - cross_x[1]):
+                cross_index = 1
 
-        x = cross_x[cross_index]
-        y = cross_y[cross_index]
-        z = cross_z[cross_index]
+            x = cross_x[cross_index]
+            y = cross_y[cross_index]
+            z = cross_z[cross_index]
 
-        ## xyz座標から緯度経度を求める
-        # xyz座標　→ 極座標　変換
-        # 原点からの距離 r(distance) = sqrt(x^2+y^2+z^2)
-        # z軸からの変換 θ = acos(z/sqrt(x^2+y^2+z^2))
-        # x軸からの変換 φ = atan(y/x)
-        distance = math.sqrt(x**2 + y**2 + z**2)
-        theta = math.acos(z/distance) # 値域:0~pi # 緯度
-        phi = math.atan2(y,x) # 値域:-pi~pi # 経度
-        #phi = math.fabs(phi - math.pi) # 値域:0~2pi
+            ## xyz座標から緯度経度を求める
+            # xyz座標　→ 極座標　変換
+            # 原点からの距離 r(distance) = sqrt(x^2+y^2+z^2)
+            # z軸からの変換 θ = acos(z/sqrt(x^2+y^2+z^2))
+            # x軸からの変換 φ = atan(y/x)
+            distance = math.sqrt(x**2 + y**2 + z**2)
+            theta = math.acos(z/distance) # 値域:0~pi # 緯度
+            phi = math.atan2(y,x) # 値域:-pi~pi # 経度
+            #phi = math.fabs(phi - math.pi) # 値域:0~2pi
 
-        if phi < 0:
-            phi = 2 * math.pi + phi
-        ## 円筒展開
-        cylinder_x = phi * r # 経度 * 球体半径
-        cylinder_y = theta * r # 経度 * 球体半径
+            if phi < 0:
+                phi = 2 * math.pi + phi
+            ## 円筒展開
+            cylinder_x = phi * r # 経度 * 球体半径
+            cylinder_y = theta * r # 経度 * 球体半径
 
-        cylinder[grid_i][0] = cylinder_x
-        cylinder[grid_i][1] = cylinder_y
+            cylinder[grid_i][0] = cylinder_x
+            cylinder[grid_i][1] = cylinder_y
+        else:
+            cylinder[grid_i][0] = -1
+            cylinder[grid_i][1] = -1
 
     # branck result image
     cylinder_height = int(math.pi * r)     # 緯度MAX = 180度 = pi
@@ -141,11 +147,11 @@ if __name__ == "__main__":
 
     print ('Play make result image')
     for i in range(len(cylinder)):
-        h = int(i / width)
-        w = int(i % width)
-        result[cylinder[i][1]][cylinder[i][0]][0] = image[h][w][0]
-        result[cylinder[i][1]][cylinder[i][0]][1] = image[h][w][1]
-        result[cylinder[i][1]][cylinder[i][0]][2] = image[h][w][2]
+        if cylinder[i][1] > 0:
+            result[int(cylinder[i][1])][int(cylinder[i][0])][0] = 255
+            result[int(cylinder[i][1])][int(cylinder[i][0])][1] = 255
+            result[int(cylinder[i][1])][int(cylinder[i][0])][2] = 255
+
 
     while True:
         gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
