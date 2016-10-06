@@ -23,7 +23,8 @@ if __name__ == "__main__":
     # x^2 + y^2 + z^2 = r^2
     r = 200 #fish_radius
     # グリッドの奥行き
-    depth = 400
+    depth = -1000
+    depth_type = 2 # 1 is y=depth , 2 is x=depth
     # 直線の公式
     # 媒介変数形式 (x,y,z) = (x1,y1,z1) + t(x2-x1,y2-y1,z-z1)
     # 変形 (x-x1)/(x2-x1) = (y-y1)/(y2-y1)=(z-z1)/(z2-z1)
@@ -45,9 +46,14 @@ if __name__ == "__main__":
     for h in range(height):
         for w in range(width):
             size_i = w + width * h
-            grid[size_i][0] = width  / 2 - w
-            grid[size_i][1] = depth
-            grid[size_i][2] = height / 2 - h
+            if depth_type == 1:
+                grid[size_i][0] = width  / 2 - w # x
+                grid[size_i][1] = depth          # y
+                grid[size_i][2] = height / 2 - h # z
+            else:
+                grid[size_i][0] = depth          # x
+                grid[size_i][1] = width  / 2 - w # y
+                grid[size_i][2] = height / 2 - h # z
     #xy軸に対して垂直に立っている人
     #grid = [[200,200,250],[200,250,200],[200,210,150],[200,250,-200],[200,150,-200],[200,190,150],[200,150,200],[200,200,250]] # →xyz ↓index
     #カメラ(球体)に対して垂直に立っている人
@@ -63,7 +69,7 @@ if __name__ == "__main__":
 
     cylinder = [[0 for i in range(2)] for j in range(len(grid))] # →xy ↓index
 
-    print ('Now play is for grid')
+    print ('Now play for grid')
     # grid search for
     for grid_i in range(len(grid)): # grid配列に入れられた要素をすべて検証
         #print ('Now play is for grid NO.' + str(grid_i))
@@ -143,7 +149,7 @@ if __name__ == "__main__":
     # branck result image
     cylinder_height = int(math.pi * r)     # 緯度MAX = 180度 = pi
     cylinder_width  = int(math.pi * r * 2) # 経度MAX = 360度 = 2pi
-    result = np.zeros((cylinder_height, cylinder_width, 3), np.uint8)
+    result = np.zeros((cylinder_height+1, cylinder_width+1, 3), np.uint8)
 
     print ('Play make result image')
     for i in range(len(cylinder)):
@@ -153,6 +159,7 @@ if __name__ == "__main__":
             result[int(cylinder[i][1])][int(cylinder[i][0])][2] = 255
 
 
+    print ('Now play show')
     while True:
         gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
         cv2.imshow("detected.jpg", gray)
