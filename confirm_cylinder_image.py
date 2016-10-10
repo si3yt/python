@@ -132,7 +132,6 @@ if __name__ == "__main__":
             distance = math.sqrt(x**2 + y**2 + z**2)
             theta = math.acos(z/distance) # 値域:0~pi # 緯度
             phi = math.atan2(y,x) # 値域:-pi~pi # 経度
-            #phi = math.fabs(phi - math.pi) # 値域:0~2pi
 
             if phi < 0:
                 phi = 2 * math.pi + phi
