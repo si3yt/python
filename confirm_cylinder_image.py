@@ -153,7 +153,7 @@ if __name__ == "__main__":
     print ('Play make result image')
     for i in range(len(cylinder)):
         if cylinder[i][1] > 0:
-            result[int(cylinder[i][1])][int(cylinder[i][0])][0] = 255
+            rx= 255
             result[int(cylinder[i][1])][int(cylinder[i][0])][1] = 255
             result[int(cylinder[i][1])][int(cylinder[i][0])][2] = 255
 
