@@ -90,6 +90,7 @@ if __name__ == "__main__":
         cv2.imshow("sphere_rotate", result)
         k = cv2.waitKey(1)
         if k == 27: # ESCキーで終了
+            cv2.imwrite("detected.jpg", result)
             break
 
     cv2.destroyAllWindows()
