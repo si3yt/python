@@ -23,6 +23,8 @@ def sinc_h(t): #sinc関数
         return 0
 
 def byCubec(x, y):
+    result_rgb = np.array([0,0,0])
+
     if x < 0 or x >= width-1 or y < 0 or y >= height-1: #参照先が画像内でない
         return [ 0, 0, 0 ]
     x1 = 1 + x - int(x)
@@ -38,17 +40,22 @@ def byCubec(x, y):
     f_flag = [False]*4
 
     if x-x1 < 0:
-        f11 = f12 = f13 = f14 = black
+        matrix_hx = np.array([ sinc_h(x2), sinc_h(x3), sinc_h(x4) ])
         f_flag[0] = True
-    if x+x4 >= width:
-        f41 = f42 = f43 = f44 = black
+    elif x+x4 >= width:
+        matrix_hx = np.array([ sinc_h(x1), sinc_h(x2), sinc_h(x3) ])
         f_flag[1] = True
+    else:
+        matrix_hx = np.array([ sinc_h(x1), sinc_h(x2), sinc_h(x3), sinc_h(x4) ])
+
     if y+y1 >= height:
-        f11 = f21 = f31 = f41 = black
+        matrix_hy = np.array([ [sinc_h(y2)], [sinc_h(y3)], [sinc_h(y4)] ])
         f_flag[2] = True
-    if y-y4 < 0:
-        f14 = f24 = f34 = f44 = black
+    elif y-y4 < 0:
+        matrix_hy = np.array([ [sinc_h(y1)], [sinc_h(y2)], [sinc_h(y3)] ])
         f_flag[3] = True
+    else:
+        matrix_hy = np.array([ [sinc_h(y1)], [sinc_h(y2)], [sinc_h(y3)], [sinc_h(y4)] ])
 
     if f_flag[0] == False:
         if f_flag[2] == False:
@@ -75,19 +82,49 @@ def byCubec(x, y):
     f32 = img[y+y2][x+x3]
     f33 = img[y-y3][x+x3]
 
-
-    result_rgb = np.array([0,0,0])
-
     for i in range(3):
-        matrix_hx = np.array([ sinc_h(x1), sinc_h(x2), sinc_h(x3), sinc_h(x4) ])
-        matrix_f  = np.array([ [f11[i], f12[i], f13[i], f14[i]], \
-                      [f21[i], f22[i], f23[i], f24[i]], \
-                      [f31[i], f32[i], f33[i], f34[i]], \
-                      [f41[i], f42[i], f43[i], f44[i]] ])
-        matrix_hy = np.array([ [sinc_h(y1)], \
-                      [sinc_h(y2)], \
-                      [sinc_h(y3)], \
-                      [sinc_h(y4)] ])
+        if f_flag[0] == True:
+            if f_flag[2] == True:
+                matrix_f = np.array([ [f22[i], f23[i], f24[i]], \
+                                      [f32[i], f33[i], f34[i]], \
+                                      [f42[i], f43[i], f44[i]] ])
+
+            elif f_flag[3] == True:
+                matrix_f  = np.array([ [f21[i], f22[i], f23[i]], \
+                                       [f31[i], f32[i], f33[i]], \
+                                       [f41[i], f42[i], f43[i]] ])
+            else:
+                matrix_f  = np.array([ [f21[i], f22[i], f23[i], f24[i]], \
+                                       [f31[i], f32[i], f33[i], f34[i]], \
+                                       [f41[i], f42[i], f43[i], f44[i]] ])
+        elif f_flag[1] == True:
+            if f_flag[2] == True:
+                matrix_f  = np.array([ [f12[i], f13[i], f14[i]], \
+                                       [f22[i], f23[i], f24[i]], \
+                                       [f32[i], f33[i], f34[i]] ])
+            elif f_flag[3] == True:
+                matrix_f  = np.array([ [f11[i], f12[i], f13[i]], \
+                                       [f21[i], f22[i], f23[i]], \
+                                       [f31[i], f32[i], f33[i]] ])
+            else:
+                matrix_f  = np.array([ [f11[i], f12[i], f13[i], f14[i]], \
+                                       [f21[i], f22[i], f23[i], f24[i]], \
+                                       [f31[i], f32[i], f33[i], f34[i]] ])
+        elif f_flag[2] == True:
+            matrix_f  = np.array([ [f12[i], f13[i], f14[i]], \
+                                   [f22[i], f23[i], f24[i]], \
+                                   [f32[i], f33[i], f34[i]], \
+                                   [f42[i], f43[i], f44[i]] ])
+        elif f_flag[3] == True:
+            matrix_f  = np.array([ [f11[i], f12[i], f13[i]], \
+                                   [f21[i], f22[i], f23[i]], \
+                                   [f31[i], f32[i], f33[i]], \
+                                   [f41[i], f42[i], f43[i]] ])
+        else:
+            matrix_f  = np.array([ [f11[i], f12[i], f13[i], f14[i]], \
+                                   [f21[i], f22[i], f23[i], f24[i]], \
+                                   [f31[i], f32[i], f33[i], f34[i]], \
+                                   [f41[i], f42[i], f43[i], f44[i]] ])
 
         matrix_cube = matrix_hx.dot(matrix_f)
         matrix_cube = matrix_cube.dot(matrix_hy)
@@ -103,7 +140,7 @@ def byCubec(x, y):
 ### main
 if __name__ == "__main__":
     # get current positions of four trackbars
-    latitude  = -40
+    latitude  = -120
     longitude = 0
     angle     = 0
 
@@ -151,8 +188,12 @@ if __name__ == "__main__":
                 phi = 2 * math.pi + phi
 
             ## 円筒展開
-            cylinder_x = phi   * r # 経度 * 球体半径
-            cylinder_y = theta * r # 経度 * 球体半径
+            cylinder_x = (phi   * r) / width  * (width  - 1) # 経度 * 球体半径
+            cylinder_y = (theta * r) / height * (height - 1) # 経度 * 球体半径
+
+            if (cylinder_x >= width-1 and cylinder_x <= width+1) or \
+                (cylinder_y >= height-1 and cylinder_y <= height+1):
+                print (r, distance, theta, phi, cylinder_x, cylinder_y)
 
             rgb = byCubec(cylinder_x, cylinder_y)
 
