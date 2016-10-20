@@ -36,96 +36,165 @@ def byCubec(x, y):
     y3 = 1 - y + int(y)
     y4 = 2 - y + int(y)
 
-    black = [0, 0, 0]
-    f_flag = [False]*4
+    left_flag         = False
+    left_top_flag     = False
+    left_bottom_flag  = False
+    right_flag        = False
+    right_top_flag    = False
+    right_bottom_flag = False
+    top_flag          = False
+    bottom_flag       = False
 
-    if x-x1 < 0:
-        matrix_hx = np.array([ sinc_h(x2), sinc_h(x3), sinc_h(x4) ])
-        f_flag[0] = True
-    elif x+x4 >= width:
-        matrix_hx = np.array([ sinc_h(x1), sinc_h(x2), sinc_h(x3) ])
-        f_flag[1] = True
-    else:
-        matrix_hx = np.array([ sinc_h(x1), sinc_h(x2), sinc_h(x3), sinc_h(x4) ])
-
-    if y+y1 >= height:
-        matrix_hy = np.array([ [sinc_h(y2)], [sinc_h(y3)], [sinc_h(y4)] ])
-        f_flag[2] = True
+    if x-x1 < 0:                    #左
+        if y+y1 >= height:          #左下
+            left_bottom_flag = True
+        elif y-y4 < 0:              #左上
+            left_top_flag = True
+        else:
+            left_flag = True
+    elif x+x4 >= width:             #右
+        if y+y1 >= height:          #右下
+            right_bottom_flag = True
+        elif y-y4 < 0:              #右上
+            right_top_flag = True
+        else:
+            right_flag = True
+    elif y+y1 >= height:
+        bottom_flag = True          #下
     elif y-y4 < 0:
-        matrix_hy = np.array([ [sinc_h(y1)], [sinc_h(y2)], [sinc_h(y3)] ])
-        f_flag[3] = True
-    else:
-        matrix_hy = np.array([ [sinc_h(y1)], [sinc_h(y2)], [sinc_h(y3)], [sinc_h(y4)] ])
+        top_flag = True             #上
 
-    if f_flag[0] == False:
-        if f_flag[2] == False:
-            f11 = img[y+y1][x-x1]
-        if f_flag[3] == False:
-            f14 = img[y-y4][x-x1]
-        f12 = img[y+y2][x-x1]
-        f13 = img[y-y3][x-x1]
-    if f_flag[1] == False:
-        if f_flag[2] == False:
-            f41 = img[y+y1][x+x4]
-        if f_flag[3] == False:
-            f44 = img[y-y4][x+x4]
-        f42 = img[y+y2][x+x4]
-        f43 = img[y-y3][x+x4]
-    if f_flag[2] == False:
-        f21 = img[y+y1][x-x2]
-        f31 = img[y+y1][x+x3]
-    if f_flag[3] == False:
-        f34 = img[y-y4][x+x3]
-        f24 = img[y-y4][x-x2]
-    f22 = img[y+y2][x-x2]
-    f23 = img[y-y3][x-x2]
-    f32 = img[y+y2][x+x3]
-    f33 = img[y-y3][x+x3]
+    f22 = img[int(y+y2)][int(x-x2)]
+    f23 = img[int(y-y3)][int(x-x2)]
+    f32 = img[int(y+y2)][int(x+x3)]
+    f33 = img[int(y-y3)][int(x+x3)]
+
+    if left_flag == True:
+        f11 = img[int(y+y1)][int(width-1)]
+        f12 = img[int(y+y2)][int(width-1)]
+        f13 = img[int(y-y3)][int(width-1)]
+        f14 = img[int(y-y4)][int(width-1)]
+        f21 = img[int(y+y1)][int(x-x2)]
+        f24 = img[int(y-y4)][int(x-x2)]
+        f31 = img[int(y+y1)][int(x+x3)]
+        f34 = img[int(y-y4)][int(x+x3)]
+        f41 = img[int(y+y1)][int(x+x4)]
+        f42 = img[int(y+y2)][int(x+x4)]
+        f43 = img[int(y-y3)][int(x+x4)]
+        f44 = img[int(y-y4)][int(x+x4)]
+    elif right_flag == True:
+        f11 = img[int(y+y1)][int(x-x1)]
+        f12 = img[int(y+y2)][int(x-x1)]
+        f13 = img[int(y-y3)][int(x-x1)]
+        f14 = img[int(y-y4)][int(x-x1)]
+        f21 = img[int(y+y1)][int(x-x2)]
+        f24 = img[int(y-y4)][int(x-x2)]
+        f31 = img[int(y+y1)][int(x+x3)]
+        f34 = img[int(y-y4)][int(x+x3)]
+        f41 = img[int(y+y1)][int(0)]
+        f42 = img[int(y+y2)][int(0)]
+        f43 = img[int(y-y3)][int(0)]
+        f44 = img[int(y-y4)][int(0)]
+    elif bottom_flag == True:
+        f11 = img[int(y-y1)][int(math.fabs(x-x1-width)-1)]
+        f12 = img[int(y+y2)][int(x-x1)]
+        f13 = img[int(y-y3)][int(x-x1)]
+        f14 = img[int(y-y4)][int(x-x1)]
+        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
+        f24 = img[int(y-y4)][int(x-x2)]
+        f31 = img[int(y-y1)][int(math.fabs(x+x3-width)-1)]
+        f34 = img[int(y-y4)][int(x+x3)]
+        f41 = img[int(y-y1)][int(math.fabs(x+x4-width)-1)]
+        f42 = img[int(y+y2)][int(x+x4)]
+        f43 = img[int(y-y3)][int(x+x4)]
+        f44 = img[int(y-y4)][int(x+x4)]
+    elif top_flag == True:
+        f11 = img[int(y+y1)][int(x-x1)]
+        f12 = img[int(y+y2)][int(x-x1)]
+        f13 = img[int(y-y3)][int(x-x1)]
+        f14 = img[int(y+y4)][int(math.fabs(x-x1-width)-1)]
+        f21 = img[int(y+y1)][int(x-x2)]
+        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
+        f31 = img[int(y+y1)][int(x+x3)]
+        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
+        f41 = img[int(y+y1)][int(x+x4)]
+        f42 = img[int(y+y2)][int(x+x4)]
+        f43 = img[int(y-y3)][int(x+x4)]
+        f44 = img[int(y+y4)][int(math.fabs(x+x4-width)-1)]
+    elif left_bottom_flag == True:
+        f11 = img[int(y-y1)][int(width-1)]
+        f12 = img[int(y+y2)][int(width-1)]
+        f13 = img[int(y-y3)][int(width-1)]
+        f14 = img[int(y-y4)][int(width-1)]
+        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
+        f24 = img[int(y-y4)][int(x-x2)]
+        f31 = img[int(y-y1)][int(math.fabs(x+x3-width)-1)]
+        f34 = img[int(y-y4)][int(x+x3)]
+        f41 = img[int(y-y1)][int(math.fabs(x+x4-width)-1)]
+        f42 = img[int(y+y2)][int(x+x4)]
+        f43 = img[int(y-y3)][int(x+x4)]
+        f44 = img[int(y-y4)][int(x+x4)]
+    elif left_top_flag == True:
+        f11 = img[int(y+y1)][int(width-1)]
+        f12 = img[int(y+y2)][int(width-1)]
+        f13 = img[int(y-y3)][int(width-1)]
+        f14 = img[int(y+y4)][int(width-1)]
+        f21 = img[int(y+y1)][int(x-x2)]
+        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
+        f31 = img[int(y+y1)][int(x+x3)]
+        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
+        f41 = img[int(y+y1)][int(x+x4)]
+        f42 = img[int(y+y2)][int(x+x4)]
+        f43 = img[int(y-y3)][int(x+x4)]
+        f44 = img[int(y+y4)][int(math.fabs(x+x4-width)-1)]
+    elif right_bottom_flag == True:
+        f11 = img[int(y-y1)][int(math.fabs(x-x1-width)-1)]
+        f12 = img[int(y+y2)][int(x-x1)]
+        f13 = img[int(y-y3)][int(x-x1)]
+        f14 = img[int(y-y4)][int(x-x1)]
+        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
+        f24 = img[int(y-y4)][int(x-x2)]
+        f31 = img[int(y-y1)][int(math.fabs(x+x3-width))]
+        f34 = img[int(y-y4)][int(x+x3)]
+        f41 = img[int(y-y1)][int(0)]
+        f42 = img[int(y+y2)][int(0)]
+        f43 = img[int(y-y3)][int(0)]
+        f44 = img[int(y-y4)][int(0)]
+    elif right_top_flag == True:
+        f11 = img[int(y+y1)][int(x-x1)]
+        f12 = img[int(y+y2)][int(x-x2)]
+        f13 = img[int(y-y3)][int(x+x3)]
+        f14 = img[int(y+y4)][int(math.fabs(x-x1-width)-1)]
+        f21 = img[int(y+y1)][int(x-x2)]
+        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
+        f31 = img[int(y+y1)][int(x+x3)]
+        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
+        f41 = img[int(y+y1)][int(0)]
+        f42 = img[int(y+y2)][int(0)]
+        f43 = img[int(y-y3)][int(0)]
+        f44 = img[int(y+y4)][int(0)]
+    else:
+        f11 = img[int(y+y1)][int(x-x1)]
+        f12 = img[int(y+y2)][int(x-x1)]
+        f13 = img[int(y-y3)][int(x-x1)]
+        f14 = img[int(y-y4)][int(x-x1)]
+        f21 = img[int(y+y1)][int(x-x2)]
+        f24 = img[int(y-y4)][int(x-x2)]
+        f31 = img[int(y+y1)][int(x+x3)]
+        f34 = img[int(y-y4)][int(x+x3)]
+        f41 = img[int(y+y1)][int(x+x4)]
+        f42 = img[int(y+y2)][int(x+x4)]
+        f43 = img[int(y-y3)][int(x+x4)]
+        f44 = img[int(y-y4)][int(x+x4)]
+
+    matrix_hx = np.array([ sinc_h(x1), sinc_h(x2), sinc_h(x3), sinc_h(x4) ])
+    matrix_hy = np.array([ [sinc_h(y1)], [sinc_h(y2)], [sinc_h(y3)], [sinc_h(y4)] ])
 
     for i in range(3):
-        if f_flag[0] == True:
-            if f_flag[2] == True:
-                matrix_f = np.array([ [f22[i], f23[i], f24[i]], \
-                                      [f32[i], f33[i], f34[i]], \
-                                      [f42[i], f43[i], f44[i]] ])
-
-            elif f_flag[3] == True:
-                matrix_f  = np.array([ [f21[i], f22[i], f23[i]], \
-                                       [f31[i], f32[i], f33[i]], \
-                                       [f41[i], f42[i], f43[i]] ])
-            else:
-                matrix_f  = np.array([ [f21[i], f22[i], f23[i], f24[i]], \
-                                       [f31[i], f32[i], f33[i], f34[i]], \
-                                       [f41[i], f42[i], f43[i], f44[i]] ])
-        elif f_flag[1] == True:
-            if f_flag[2] == True:
-                matrix_f  = np.array([ [f12[i], f13[i], f14[i]], \
-                                       [f22[i], f23[i], f24[i]], \
-                                       [f32[i], f33[i], f34[i]] ])
-            elif f_flag[3] == True:
-                matrix_f  = np.array([ [f11[i], f12[i], f13[i]], \
-                                       [f21[i], f22[i], f23[i]], \
-                                       [f31[i], f32[i], f33[i]] ])
-            else:
-                matrix_f  = np.array([ [f11[i], f12[i], f13[i], f14[i]], \
-                                       [f21[i], f22[i], f23[i], f24[i]], \
-                                       [f31[i], f32[i], f33[i], f34[i]] ])
-        elif f_flag[2] == True:
-            matrix_f  = np.array([ [f12[i], f13[i], f14[i]], \
-                                   [f22[i], f23[i], f24[i]], \
-                                   [f32[i], f33[i], f34[i]], \
-                                   [f42[i], f43[i], f44[i]] ])
-        elif f_flag[3] == True:
-            matrix_f  = np.array([ [f11[i], f12[i], f13[i]], \
-                                   [f21[i], f22[i], f23[i]], \
-                                   [f31[i], f32[i], f33[i]], \
-                                   [f41[i], f42[i], f43[i]] ])
-        else:
-            matrix_f  = np.array([ [f11[i], f12[i], f13[i], f14[i]], \
-                                   [f21[i], f22[i], f23[i], f24[i]], \
-                                   [f31[i], f32[i], f33[i], f34[i]], \
-                                   [f41[i], f42[i], f43[i], f44[i]] ])
-
+        matrix_f  = np.array([ [f11[i], f12[i], f13[i], f14[i]], \
+                               [f21[i], f22[i], f23[i], f24[i]], \
+                               [f31[i], f32[i], f33[i], f34[i]], \
+                               [f41[i], f42[i], f43[i], f44[i]] ])
         matrix_cube = matrix_hx.dot(matrix_f)
         matrix_cube = matrix_cube.dot(matrix_hy)
         if matrix_cube > 255:
@@ -140,7 +209,7 @@ def byCubec(x, y):
 ### main
 if __name__ == "__main__":
     # get current positions of four trackbars
-    latitude  = -120
+    latitude  = -40
     longitude = 0
     angle     = 0
 
