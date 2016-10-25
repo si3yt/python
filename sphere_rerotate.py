@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import os
 
+# create files
+import by_cubec as by_cubec
+import EXIF_rotate as exif
+
 # 画像の読み込み
 img    = cv2.imread("image/sample00.jpg", 1)
 height = img.shape[0]
@@ -13,209 +17,49 @@ width  = img.shape[1]
 # 結果画像配列作成
 result = np.zeros((height, width, 3), np.uint8)
 
-def sinc_h(t): #sinc関数
-    t = math.fabs(t)
-    if t <= 1:
-        return t**3 - 2 * t**2 + 1
-    elif 1 < t <= 2:
-        return -t**3 + 5 * t**2 - 8 * t + 4
-    elif 2 < t: #else
-        return 0
+latitude  = 40
+longitude = 0
+angle     = 0
 
-def byCubec(x, y):
-    result_rgb = np.array([0,0,0])
+latitude_rad  = -latitude  * math.pi / 180   # y軸周り
+longitude_rad = -longitude * math.pi / 180   # z軸周り
+angle_rad     = -angle     * math.pi / 180   # z軸周り
 
-    if x < 0 or x >= width-1 or y < 0 or y >= height-1: #参照先が画像内でない
-        return [ 0, 0, 0 ]
-    x1 = 1 + x - int(x)
-    x2 = x - int(x)
-    x3 = 1 - x + int(x)
-    x4 = 2 - x + int(x)
-    y1 = 1 + y - int(y)
-    y2 = y - int(y)
-    y3 = 1 - y + int(y)
-    y4 = 2 - y + int(y)
+def rotate():
+    # z軸周り
+    z_rotate = np.matrix( [[math.cos(longitude_rad)  , math.sin(longitude_rad), 0], \
+                           [- math.sin(longitude_rad), math.cos(longitude_rad), 0], \
+                           [0                        , 0                      , 1]] )
+    # y軸周り
+    y_rotate = np.matrix( [[math.cos(latitude_rad), 0, -math.sin(latitude_rad)], \
+                           [0                     , 1, 0                      ], \
+                           [math.sin(latitude_rad), 0, math.cos(latitude_rad) ]] )
+    # x軸周り
+    x_rotate = np.matrix( [[1, 0                   , 0                  ], \
+                           [0, math.cos(angle_rad) , math.sin(angle_rad)], \
+                           [0, -math.sin(angle_rad), math.cos(angle_rad)]] )
+    # 行列の積
+    matrix = x_rotate.dot(y_rotate) # x軸回転 * y軸回転
+    matrix = matrix.dot(z_rotate)   # x軸回転 * y軸回転 * z軸回転
 
-    left_flag         = False
-    left_top_flag     = False
-    left_bottom_flag  = False
-    right_flag        = False
-    right_top_flag    = False
-    right_bottom_flag = False
-    top_flag          = False
-    bottom_flag       = False
+    return matrix
 
-    if x-x1 < 0:                    #左
-        if y+y1 >= height:          #左下
-            left_bottom_flag = True
-        elif y-y4 < 0:              #左上
-            left_top_flag = True
-        else:
-            left_flag = True
-    elif x+x4 >= width:             #右
-        if y+y1 >= height:          #右下
-            right_bottom_flag = True
-        elif y-y4 < 0:              #右上
-            right_top_flag = True
-        else:
-            right_flag = True
-    elif y+y1 >= height:
-        bottom_flag = True          #下
-    elif y-y4 < 0:
-        top_flag = True             #上
+def theta_rotate():
+    zenith_x, zenith_y, compass = exif.get_angles("image/theta04.jpg")
 
-    f22 = img[int(y+y2)][int(x-x2)]
-    f23 = img[int(y-y3)][int(x-x2)]
-    f32 = img[int(y+y2)][int(x+x3)]
-    f33 = img[int(y-y3)][int(x+x3)]
+    zenith_x = zenith_x * math.pi / 180   # y軸周り
+    zenith_y = zenith_y * math.pi / 180   # z軸周り
 
-    if left_flag == True:
-        f11 = img[int(y+y1)][int(width-1)]
-        f12 = img[int(y+y2)][int(width-1)]
-        f13 = img[int(y-y3)][int(width-1)]
-        f14 = img[int(y-y4)][int(width-1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y+y1)][int(x+x4)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y-y4)][int(x+x4)]
-    elif right_flag == True:
-        f11 = img[int(y+y1)][int(x-x1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y-y4)][int(x-x1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y+y1)][int(0)]
-        f42 = img[int(y+y2)][int(0)]
-        f43 = img[int(y-y3)][int(0)]
-        f44 = img[int(y-y4)][int(0)]
-    elif bottom_flag == True:
-        f11 = img[int(y-y1)][int(math.fabs(x-x1-width)-1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y-y4)][int(x-x1)]
-        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y-y1)][int(math.fabs(x+x3-width)-1)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y-y1)][int(math.fabs(x+x4-width)-1)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y-y4)][int(x+x4)]
-    elif top_flag == True:
-        f11 = img[int(y+y1)][int(x-x1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y+y4)][int(math.fabs(x-x1-width)-1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
-        f41 = img[int(y+y1)][int(x+x4)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y+y4)][int(math.fabs(x+x4-width)-1)]
-    elif left_bottom_flag == True:
-        f11 = img[int(y-y1)][int(width-1)]
-        f12 = img[int(y+y2)][int(width-1)]
-        f13 = img[int(y-y3)][int(width-1)]
-        f14 = img[int(y-y4)][int(width-1)]
-        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y-y1)][int(math.fabs(x+x3-width)-1)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y-y1)][int(math.fabs(x+x4-width)-1)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y-y4)][int(x+x4)]
-    elif left_top_flag == True:
-        f11 = img[int(y+y1)][int(width-1)]
-        f12 = img[int(y+y2)][int(width-1)]
-        f13 = img[int(y-y3)][int(width-1)]
-        f14 = img[int(y+y4)][int(width-1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
-        f41 = img[int(y+y1)][int(x+x4)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y+y4)][int(math.fabs(x+x4-width)-1)]
-    elif right_bottom_flag == True:
-        f11 = img[int(y-y1)][int(math.fabs(x-x1-width)-1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y-y4)][int(x-x1)]
-        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y-y1)][int(math.fabs(x+x3-width))]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y-y1)][int(0)]
-        f42 = img[int(y+y2)][int(0)]
-        f43 = img[int(y-y3)][int(0)]
-        f44 = img[int(y-y4)][int(0)]
-    elif right_top_flag == True:
-        f11 = img[int(y+y1)][int(x-x1)]
-        f12 = img[int(y+y2)][int(x-x2)]
-        f13 = img[int(y-y3)][int(x+x3)]
-        f14 = img[int(y+y4)][int(math.fabs(x-x1-width)-1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
-        f41 = img[int(y+y1)][int(0)]
-        f42 = img[int(y+y2)][int(0)]
-        f43 = img[int(y-y3)][int(0)]
-        f44 = img[int(y+y4)][int(0)]
-    else:
-        f11 = img[int(y+y1)][int(x-x1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y-y4)][int(x-x1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y+y1)][int(x+x4)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y-y4)][int(x+x4)]
+    matrix = np.matrix( [[math.cos(zenith_y), -math.sin(zenith_y)*math.cos(zenith_x), -math.sin(zenith_y)*math.sin(zenith_x)], \
+                         [math.sin(zenith_y), math.cos(zenith_y)*math.cos(zenith_x), math.cos(zenith_y)*math.sin(zenith_x)], \
+                         [0, math.sin(zenith_x), math.cos(zenith_x)]] )
 
-    matrix_hx = np.array([ sinc_h(x1), sinc_h(x2), sinc_h(x3), sinc_h(x4) ])
-    matrix_hy = np.array([ [sinc_h(y1)], [sinc_h(y2)], [sinc_h(y3)], [sinc_h(y4)] ])
-
-    for i in range(3):
-        matrix_f  = np.array([ [f11[i], f12[i], f13[i], f14[i]], \
-                               [f21[i], f22[i], f23[i], f24[i]], \
-                               [f31[i], f32[i], f33[i], f34[i]], \
-                               [f41[i], f42[i], f43[i], f44[i]] ])
-        matrix_cube = matrix_hx.dot(matrix_f)
-        matrix_cube = matrix_cube.dot(matrix_hy)
-        if matrix_cube > 255:
-            matrix_cube = 255
-        elif matrix_cube < 0:
-            matrix_cube = 0
-        result_rgb[i] = matrix_cube
-
-    return result_rgb
-
+    return matrix
 
 ### main
 if __name__ == "__main__":
-    # get current positions of four trackbars
-    latitude  = -40
-    longitude = 0
-    angle     = 0
 
-    latitude_rad  = -latitude  * math.pi / 180   # y軸周り
-    longitude_rad = -longitude * math.pi / 180   # z軸周り
-    angle_rad     = -angle     * math.pi / 180   # z軸周り
+    matrix = theta_rotate()
 
     r = height / math.pi
 
@@ -229,25 +73,9 @@ if __name__ == "__main__":
             y = r * math.sin(sphere_lat_rad) * math.sin(sphere_lon_rad)
             z = r * math.cos(sphere_lat_rad)
 
-            # z軸周り
-            z_rotate = np.matrix( [[math.cos(longitude_rad)  , math.sin(longitude_rad), 0], \
-                                   [- math.sin(longitude_rad), math.cos(longitude_rad), 0], \
-                                   [0                        , 0                      , 1]] )
-            # y軸周り
-            y_rotate = np.matrix( [[math.cos(latitude_rad), 0, -math.sin(latitude_rad)], \
-                                   [0                     , 1, 0                      ], \
-                                   [math.sin(latitude_rad), 0, math.cos(latitude_rad) ]] )
-            # x軸周り
-            x_rotate = np.matrix( [[1, 0                   , 0                  ], \
-                                   [0, math.cos(angle_rad) , math.sin(angle_rad)], \
-                                   [0, -math.sin(angle_rad), math.cos(angle_rad)]] )
-            # 行列の積
-            matrix = x_rotate.dot(y_rotate) # x軸回転 * y軸回転
-            matrix = matrix.dot(z_rotate)   # x軸回転 * y軸回転 * z軸回転
-
-            new_x = x * matrix[0,0] + y * matrix[1,0] + z * matrix[2,0]
-            new_y = x * matrix[0,1] + y * matrix[1,1] + z * matrix[2,1]
-            new_z = x * matrix[0,2] + y * matrix[1,2] + z * matrix[2,2]
+            new_x = x * matrix[0,0] + y * matrix[0,1] + z * matrix[0,2]
+            new_y = x * matrix[1,0] + y * matrix[1,1] + z * matrix[1,2]
+            new_z = x * matrix[2,0] + y * matrix[2,1] + z * matrix[2,2]
 
             distance = math.sqrt(new_x**2 + new_y**2 + new_z**2)
             theta    = math.acos(new_z/distance)                 # 値域:0~pi   # 緯度
@@ -260,11 +88,7 @@ if __name__ == "__main__":
             cylinder_x = (phi   * r) / width  * (width  - 1) # 経度 * 球体半径
             cylinder_y = (theta * r) / height * (height - 1) # 経度 * 球体半径
 
-            if (cylinder_x >= width-1 and cylinder_x <= width+1) or \
-                (cylinder_y >= height-1 and cylinder_y <= height+1):
-                print (r, distance, theta, phi, cylinder_x, cylinder_y)
-
-            rgb = byCubec(cylinder_x, cylinder_y)
+            rgb = by_cubec.byCubec(cylinder_x, cylinder_y, img, height, width)
 
             result[h][w][0] = rgb[0]
             result[h][w][1] = rgb[1]
