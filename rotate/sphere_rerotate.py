@@ -7,59 +7,38 @@ import matplotlib.image as mpimg
 import os
 
 # create files
-import by_cubec as by_cubec
-import EXIF_rotate as exif
+import bicubic as bicubic
+import exif as exif
+import rotate as rotate
 
 # 画像の読み込み
-img    = cv2.imread("image/sample00.jpg", 1)
+img    = cv2.imread("../image/sample00.jpg", 1)
 height = img.shape[0]
 width  = img.shape[1]
 # 結果画像配列作成
 result = np.zeros((height, width, 3), np.uint8)
-
-latitude  = 40
-longitude = 0
-angle     = 0
-
-latitude_rad  = -latitude  * math.pi / 180   # y軸周り
-longitude_rad = -longitude * math.pi / 180   # z軸周り
-angle_rad     = -angle     * math.pi / 180   # z軸周り
-
-def rotate():
-    # z軸周り
-    z_rotate = np.matrix( [[math.cos(longitude_rad)  , math.sin(longitude_rad), 0], \
-                           [- math.sin(longitude_rad), math.cos(longitude_rad), 0], \
-                           [0                        , 0                      , 1]] )
-    # y軸周り
-    y_rotate = np.matrix( [[math.cos(latitude_rad), 0, -math.sin(latitude_rad)], \
-                           [0                     , 1, 0                      ], \
-                           [math.sin(latitude_rad), 0, math.cos(latitude_rad) ]] )
-    # x軸周り
-    x_rotate = np.matrix( [[1, 0                   , 0                  ], \
-                           [0, math.cos(angle_rad) , math.sin(angle_rad)], \
-                           [0, -math.sin(angle_rad), math.cos(angle_rad)]] )
-    # 行列の積
-    matrix = x_rotate.dot(y_rotate) # x軸回転 * y軸回転
-    matrix = matrix.dot(z_rotate)   # x軸回転 * y軸回転 * z軸回転
-
-    return matrix
-
-def theta_rotate():
-    zenith_x, zenith_y, compass = exif.get_angles("image/theta04.jpg")
-
-    zenith_x = zenith_x * math.pi / 180   # y軸周り
-    zenith_y = zenith_y * math.pi / 180   # z軸周り
-
-    matrix = np.matrix( [[math.cos(zenith_y), -math.sin(zenith_y)*math.cos(zenith_x), -math.sin(zenith_y)*math.sin(zenith_x)], \
-                         [math.sin(zenith_y), math.cos(zenith_y)*math.cos(zenith_x), math.cos(zenith_y)*math.sin(zenith_x)], \
-                         [0, math.sin(zenith_x), math.cos(zenith_x)]] )
-
-    return matrix
-
+# 回転角度
+latitude  = 50  #緯度
+longitude = 0   #経度
+angle     = 0   #角度
+# 度　→　ラジアン
+def rad_conv(a):
+    a = a * math.pi / 180
+    return a
+# 回転角ラジアン
+latitude_rad  = rad_conv(-latitude)  # y軸周り
+longitude_rad = rad_conv(-longitude) # x軸周り
+angle_rad     = rad_conv(-angle)     # z軸周り
 ### main
 if __name__ == "__main__":
 
-    matrix = theta_rotate()
+    zenith_x, zenith_y, compass = exif.get_angles("../image/theta04.jpg")
+    zenith_x_rad = rad_conv(zenith_x)
+    zenith_y_rad = rad_conv(zenith_y)
+    compass_rad  = rad_conv(compass)
+    #matrix = rotate.zenith_rotate(zenith_x, zenith_y, compass)
+    #matrix = rotate.rerotate(longitude_rad, latitude_rad, angle_rad)
+    matrix = rotate.rerotate(compass_rad, zenith_y_rad, zenith_x_rad)
 
     r = height / math.pi
 
@@ -88,7 +67,7 @@ if __name__ == "__main__":
             cylinder_x = (phi   * r) / width  * (width  - 1) # 経度 * 球体半径
             cylinder_y = (theta * r) / height * (height - 1) # 経度 * 球体半径
 
-            rgb = by_cubec.byCubec(cylinder_x, cylinder_y, img, height, width)
+            rgb = bicubic.bicubic(cylinder_x, cylinder_y, img, height, width)
 
             result[h][w][0] = rgb[0]
             result[h][w][1] = rgb[1]

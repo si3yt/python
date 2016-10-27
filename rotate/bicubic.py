@@ -1,10 +1,8 @@
 # import
-import cv2
-import numpy as np
-import math
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import os
+import cv2
+import math
+import numpy as np
 
 def sinc_h(t): #sinc関数
     t = math.fabs(t)
@@ -15,7 +13,7 @@ def sinc_h(t): #sinc関数
     elif 2 < t: #else
         return 0
 
-def byCubec(x, y, img, height, width):
+def bicubic(x, y, img, height, width):
     result_rgb = np.array([0,0,0])
 
     if x < 0 or x >= width-1 or y < 0 or y >= height-1: #参照先が画像内でない
