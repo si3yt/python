@@ -12,7 +12,7 @@ import exif as exif
 import rotate as rotate
 
 # 画像の読み込み
-img    = cv2.imread("../image/sample00.jpg", 1)
+img    = cv2.imread("../image/R0010156.jpg", 1)
 height = img.shape[0]
 width  = img.shape[1]
 # 結果画像配列作成
@@ -32,7 +32,7 @@ angle_rad     = rad_conv(-angle)     # z軸周り
 ### main
 if __name__ == "__main__":
 
-    zenith_x, zenith_y, compass = exif.get_angles("../image/theta04.jpg")
+    zenith_x, zenith_y, compass = exif.get_angles("../image/R0010156.jpg")
     zenith_x_rad = rad_conv(zenith_x)
     zenith_y_rad = rad_conv(zenith_y)
     compass_rad  = rad_conv(compass)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         cv2.imshow("sphere_rotate", result)
         k = cv2.waitKey(1)
         if k == 27: # ESCキーで終了
-            cv2.imwrite("detected.jpg", result)
+            cv2.imwrite("detected000.jpg", result)
             break
 
     cv2.destroyAllWindows()
