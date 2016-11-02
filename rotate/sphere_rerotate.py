@@ -12,15 +12,16 @@ import exif as exif
 import rotate as rotate
 
 # 画像の読み込み
-img    = cv2.imread("../image/R0010156.jpg", 1)
+filename = '../image/sphere_wr.jpg'
+img    = cv2.imread(filename, 1)
 height = img.shape[0]
 width  = img.shape[1]
 # 結果画像配列作成
 result = np.zeros((height, width, 3), np.uint8)
 # 回転角度
 latitude  = 50  #緯度
-longitude = 0   #経度
-angle     = 0   #角度
+longitude = 40   #経度
+angle     = 30   #角度
 # 度　→　ラジアン
 def rad_conv(a):
     a = a * math.pi / 180
@@ -32,13 +33,13 @@ angle_rad     = rad_conv(-angle)     # z軸周り
 ### main
 if __name__ == "__main__":
 
-    zenith_x, zenith_y, compass = exif.get_angles("../image/R0010156.jpg")
-    zenith_x_rad = rad_conv(zenith_x)
-    zenith_y_rad = rad_conv(zenith_y)
-    compass_rad  = rad_conv(compass)
+    #zenith_x, zenith_y, compass = exif.get_angles(filename)
+    #zenith_x_rad = rad_conv(zenith_x)
+    #zenith_y_rad = rad_conv(zenith_y)
+    #compass_rad  = rad_conv(compass)
     #matrix = rotate.zenith_rotate(zenith_x, zenith_y, compass)
-    #matrix = rotate.rerotate(longitude_rad, latitude_rad, angle_rad)
-    matrix = rotate.rerotate(compass_rad, zenith_y_rad, zenith_x_rad)
+    matrix = rotate.rerotate(longitude_rad, latitude_rad, angle_rad)
+    #matrix = rotate.rerotate(compass_rad, zenith_y_rad, zenith_x_rad)
 
     r = height / math.pi
 
@@ -84,7 +85,7 @@ if __name__ == "__main__":
         cv2.imshow("sphere_rotate", result)
         k = cv2.waitKey(1)
         if k == 27: # ESCキーで終了
-            cv2.imwrite("detected000.jpg", result)
+            cv2.imwrite("detected.jpg", result)
             break
 
     cv2.destroyAllWindows()
