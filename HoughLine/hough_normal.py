@@ -7,8 +7,6 @@ height = img.shape[0]
 width = img.shape[1]
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 edges = cv2.Canny(gray,50,150,apertureSize = 3)
-minLineLength = 100
-maxLineGap = 10
 
 lines = cv2.HoughLines(edges,1,math.pi/360,200)
 

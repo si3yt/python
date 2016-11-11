@@ -5,6 +5,7 @@ import math
 img = cv2.imread('../image/square_theta.jpg')
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 edges = cv2.Canny(gray,50,150,apertureSize = 3)
+
 minLineLength = 100
 maxLineGap = 10
 
