@@ -2,15 +2,24 @@ import cv2
 import numpy as np
 import math
 
-img = cv2.imread('../image/square_theta.jpg')
+img = cv2.imread('../image/theta04_cor.jpg')
 height = img.shape[0]
 width = img.shape[1]
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 edges = cv2.Canny(gray,50,150,apertureSize = 3)
 
-lines = cv2.HoughLines(edges,1,math.pi/360,200)
+line_len = 100
 
-range_line = 7000
+lines = cv2.HoughLines(edges,1,math.pi/360,line_len)
+
+degree_range = 10
+near_line = 100
+near_lined = degree_range/2
+near_x = [-near_line]
+near_y = [-near_line]
+near_degree = [-1]
+
+range_line = width
 
 for i in range(0,len(lines)):
     for rho,theta in lines[i]:
@@ -23,8 +32,23 @@ for i in range(0,len(lines)):
         x2 = int(x0 - range_line*(-b))
         y2 = int(y0 - range_line*(a))
 
-        if x0 > 1000 and x0 < 2700 and y0 > 600 and y0 < 1800:
-            cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+        degree = theta * 180 / math.pi
+
+        if degree < degree_range or degree > 180-degree_range:
+            near_flag = True
+            for j in range(1,len(near_x)):
+                x = near_x[j]
+                y = near_y[j]
+                nd = near_degree[j]
+                if abs(x-x0) < near_line and abs(nd-degree) < near_lined:
+                    near_flag = False
+                    break
+            if near_flag:
+                cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+
+                near_x.append(x0)
+                near_y.append(y0)
+                near_degree.append(degree)
 
 while(1):
     img = cv2.resize(img, (int(width/4), int(height/4)))
