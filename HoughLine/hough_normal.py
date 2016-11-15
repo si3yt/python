@@ -19,6 +19,8 @@ near_x = [-near_line]
 near_y = [-near_line]
 near_degree = [-1]
 
+line_xyd = []
+
 range_line = width
 
 for i in range(0,len(lines)):
@@ -44,11 +46,19 @@ for i in range(0,len(lines)):
                     near_flag = False
                     break
             if near_flag:
-                cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-
                 near_x.append(x0)
                 near_y.append(y0)
                 near_degree.append(degree)
+                line_xyd.append((x1,y1,x2,y2,degree))
+
+for i in range(0,len(line_xyd)):
+    x1 = line_xyd[i][0]
+    y1 = line_xyd[i][1]
+    x2 = line_xyd[i][2]
+    y2 = line_xyd[i][3]
+    degree = line_xyd[i][4]
+    cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+    print (x1,y1,x2,y2,degree,i)
 
 while(1):
     img = cv2.resize(img, (int(width/4), int(height/4)))
