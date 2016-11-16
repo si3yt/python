@@ -13,7 +13,7 @@ line_len = 100
 lines = cv2.HoughLines(edges,1,math.pi/360,line_len)
 
 degree_range = 10
-near_line = 100
+near_line = 0
 near_lined = degree_range/2
 near_x = [-near_line]
 near_y = [-near_line]
@@ -58,8 +58,7 @@ for i in range(0,len(line_xyd)):
     y2 = line_xyd[i][3]
     degree = line_xyd[i][4]
     cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-    print (x1,y1,x2,y2,degree,i)
-
+    
 while(1):
     img = cv2.resize(img, (int(width/4), int(height/4)))
     cv2.imshow("sphere_rotate", img)

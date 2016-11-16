@@ -15,7 +15,8 @@ lines = cv2.HoughLines(edges,1,math.pi/360,line_len)
 
 degree_range = 10
 
-line_xyd = []
+line_xyd_left = []
+line_xyd_right = []
 
 range_line = width
 
@@ -34,55 +35,114 @@ for i in range(0,len(lines)):
 
         if degree < degree_range:
             degree = degree + 10
-            line_xyd.append((x1,y1,x2,y2,degree,x0))
+            line_xyd_right.append((x1,y1,x2,y2,degree,x0))
         elif degree > 180-degree_range:
             if degree == 180:
                 degree = 10
             else:
                 degree = degree - 170
-            line_xyd.append((x1,y1,x2,y2,degree,x0))
+            line_xyd_left.append((x1,y1,x2,y2,degree,x0))
 
-sorted(line_xyd, key=itemgetter(5))
+line_xyd_right = sorted(line_xyd_right, key=lambda x: float(x[5]))
+line_xyd_left = sorted(line_xyd_left,  key=lambda x: float(x[5]))
 
-print (line_xyd)
+diff_deg_lim = 5
+diff_x0_lim  = 20
 
-for i in range(0,len(line_xyd)):
-    x1 = line_xyd[i][0]
-    y1 = line_xyd[i][1]
-    x2 = line_xyd[i][2]
-    y2 = line_xyd[i][3]
-    degree = line_xyd[i][4]
-    x0 = line_xyd[i][5]
+draw_line = []
+
+for i in range(0,len(line_xyd_right)):
+    x1 = line_xyd_right[i][0]
+    y1 = line_xyd_right[i][1]
+    x2 = line_xyd_right[i][2]
+    y2 = line_xyd_right[i][3]
+    degree = line_xyd_right[i][4]
+    x0 = line_xyd_right[i][5]
     diff_deg = 0
     diff_x0 = 0
     diff_flag = False
-    if (i+1 < len(line_xyd) and i-1 >= 0):
-        diff_deg = abs(degree - line_xyd[i+1][4])
-        diff_deg += abs(degree - line_xyd[i-1][4])
-        diff_x0 = abs(x0 - line_xyd[i+1][5])
-        diff_x0 += abs(x0 - line_xyd[i-1][5])
-    if diff_deg < 10 and diff_x0 < 500:
-        diff_flag = True
 
-    if (i+2 < len(line_xyd)):
-        diff_deg = abs(degree - line_xyd[i+1][4])
-        diff_deg += abs(degree - line_xyd[i+2][4])
-        diff_x0 = abs(x0 - line_xyd[i+1][5])
-        diff_x0 += abs(x0 - line_xyd[i+2][5])
-    if diff_deg < 10 and diff_x0 < 500:
-        diff_flag = True
+    if (i+1 < len(line_xyd_right)):
+        diff_deg = abs(degree - line_xyd_right[i+1][4])
+        diff_x0  = abs(x0 - line_xyd_right[i+1][5])
+    if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+        if (i+2 < len(line_xyd_right)):
+            diff_deg = abs(degree - line_xyd_right[i+2][4])
+            diff_x0  = abs(x0 - line_xyd_right[i+2][5])
+            if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+                diff_flag = True
+        if (i-1 >= 0):
+            diff_deg = abs(degree - line_xyd_right[i-1][4])
+            diff_x0 = abs(x0 - line_xyd_right[i-1][5])
+            if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+                diff_flag = True
 
-    if (i-2 >= 0):
-        diff_deg = abs(degree - line_xyd[i-1][4])
-        diff_deg += abs(degree - line_xyd[i-2][4])
-        diff_x0 = abs(x0 - line_xyd[i-1][5])
-        diff_x0 += abs(x0 - line_xyd[i-2][5])
-    if diff_deg < 10 and diff_x0 < 500:
-        diff_flag = True
+    if (i-1 >= 0):
+        diff_deg = abs(degree - line_xyd_right[i-1][4])
+        diff_x0 = abs(x0 - line_xyd_right[i-1][5])
+    if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+        if (i-2 >= 0):
+            diff_deg = abs(degree - line_xyd_right[i-2][4])
+            diff_x0  = abs(x0 - line_xyd_right[i-2][5])
+            if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+                diff_flag = True
+        if (i+1 < len(line_xyd_right)):
+            diff_deg = abs(degree - line_xyd_right[i+1][4])
+            diff_x0  = abs(x0 - line_xyd_right[i+1][5])
+            if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+                diff_flag = True
+
 
     if diff_flag == False:
+        draw_line.append((x1,y1,x2,y2,degree,x0))
         cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
 
+for i in range(0,len(line_xyd_left)):
+    x1 = line_xyd_left[i][0]
+    y1 = line_xyd_left[i][1]
+    x2 = line_xyd_left[i][2]
+    y2 = line_xyd_left[i][3]
+    degree = line_xyd_left[i][4]
+    x0 = line_xyd_left[i][5]
+    diff_deg = 0
+    diff_x0 = 0
+    diff_flag = False
+
+    if (i+1 < len(line_xyd_left)):
+        diff_deg = abs(degree - line_xyd_left[i+1][4])
+        diff_x0 = abs(x0 - line_xyd_left[i+1][5])
+    if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+        if (i+2 < len(line_xyd_left)):
+            diff_deg = abs(degree - line_xyd_left[i+2][4])
+            diff_x0 = abs(x0 - line_xyd_left[i+2][5])
+            if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+                diff_flag = True
+        if (i-1 >= 0):
+            diff_deg = abs(degree - line_xyd_left[i-1][4])
+            diff_x0 = abs(x0 - line_xyd_left[i-1][5])
+            if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+                diff_flag = True
+
+    if (i-1 >= 0):
+        diff_deg = abs(degree - line_xyd_left[i-1][4])
+        diff_x0 = abs(x0 - line_xyd_left[i-1][5])
+    if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+        if (i-2 >= 0):
+            diff_deg = abs(degree - line_xyd_left[i-2][4])
+            diff_x0 = abs(x0 - line_xyd_left[i-2][5])
+            if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+                diff_flag = True
+        if (i+1 < len(line_xyd_left)):
+            diff_deg = abs(degree - line_xyd_left[i+1][4])
+            diff_x0 = abs(x0 - line_xyd_left[i+1][5])
+            if diff_deg < diff_deg_lim and diff_x0 < diff_x0_lim:
+                diff_flag = True
+
+    if diff_flag == False:
+        draw_line.append((x1,y1,x2,y2,degree,x0))
+        cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+
+for i in range(0,len(draw_line)):
 
 
 while(1):
