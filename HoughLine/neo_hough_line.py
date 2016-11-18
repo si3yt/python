@@ -142,8 +142,6 @@ for i in range(0,len(line_xyd_left)):
         draw_line.append((x1,y1,x2,y2,degree,x0))
         cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
 
-for i in range(0,len(draw_line)):
-
 
 while(1):
     img = cv2.resize(img, (int(width/4), int(height/4)))

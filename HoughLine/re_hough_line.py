@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+from operator import itemgetter, attrgetter
 
 img = cv2.imread('../image/theta04_cor.jpg')
 height = img.shape[0]
@@ -13,11 +14,6 @@ line_len = 100
 lines = cv2.HoughLines(edges,1,math.pi/360,line_len)
 
 degree_range = 10
-near_line = 0
-near_lined = degree_range/2
-near_x = [-near_line]
-near_y = [-near_line]
-near_degree = [-1]
 
 line_xyd = []
 
@@ -36,8 +32,20 @@ for i in range(0,len(lines)):
 
         degree = theta * 180 / math.pi
 
-        if degree < degree_range or degree > 180-degree_range:
-            line_xyd.append((x1,y1,x2,y2,degree))
+        if degree < degree_range:
+            degree = degree + 10
+            line_xyd.append((x1,y1,x2,y2,degree,x0))
+        elif degree > 180-degree_range:
+            if degree == 180:
+                degree = 10
+            else:
+                degree = degree - 170
+            line_xyd.append((x1,y1,x2,y2,degree,x0))
+
+diff_deg_lim = 5
+diff_x_lim  = 20
+
+draw_line = []
 
 for i in range(0,len(line_xyd)):
     x1 = line_xyd[i][0]
@@ -45,7 +53,21 @@ for i in range(0,len(line_xyd)):
     x2 = line_xyd[i][2]
     y2 = line_xyd[i][3]
     degree = line_xyd[i][4]
-    cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+    x0 = line_xyd[i][5]
+    diff_deg = 0
+    diff_x = 0
+    diff_count = 0
+
+    for j in range(0,len(line_xyd)):
+        if j != i:
+            diff_deg = abs(degree - line_xyd[j][4])
+            diff_x  = abs(x0 - line_xyd[j][5])
+            if diff_deg < diff_deg_lim and diff_x < diff_x_lim:
+                diff_count += 1
+
+    if diff_count < 2:
+        draw_line.append((x1,y1,x2,y2,degree,x0))
+        cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
 
 while(1):
     img = cv2.resize(img, (int(width/4), int(height/4)))

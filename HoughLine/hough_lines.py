@@ -2,12 +2,12 @@ import cv2
 import numpy as np
 import math
 
-img = cv2.imread('../image/square_theta.jpg')
+img = cv2.imread('../image/grid_photo.JPG')
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 edges = cv2.Canny(gray,50,150,apertureSize = 3)
 
 minLineLength = 100
-maxLineGap = 10
+maxLineGap = 50
 
 lines = cv2.HoughLinesP(edges,1,math.pi/180,100,minLineLength,maxLineGap)
 # 第二引数：画素単位
