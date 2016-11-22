@@ -105,8 +105,102 @@ for i in range(0,len(line_xyd)):
         draw_line.append((x11,y11,x12,y12,degree,x0))
         cv2.line(img,(x11,y11),(x12,y12),(0,0,255),2)
 
+amplitude = 100
+newton_threshold = 0.00001
+
+sin_bin = [0]*int(360/5)
+
+phase = 0
+
+img = cv2.imread('../image/theta04_cor.jpg')
+for p in range(0,len(sin_bin)):
+    phase = p * 5
+    phase = phase * math.pi / 180
+    img = cv2.imread('../image/theta04_cor.jpg')
+    for i in range(0,width):
+        x1 = i
+        y1 = int(-amplitude * math.sin(2*math.pi * i/width + phase) + height/2)
+        x2 = int(width/2)
+        y2 = 500
+        cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+
+    while(1):
+        img = cv2.resize(img, (int(width/4), int(height/4)))
+        cv2.imshow("sphere_rotate", img)
+        k = cv2.waitKey(1)
+        if k == 27: # ESCキーで終了
+            break
 
 
+for p in range(0,len(sin_bin)):
+    phase = p
+    phase = phase * math.pi / 180
+    for i in range(0,len(draw_line)):
+        x1 = draw_line[i][0]
+        y1 = draw_line[i][1]
+        x2 = draw_line[i][2]
+        y2 = draw_line[i][3]
+        degree = draw_line[i][4]
+        x0 = draw_line[i][5]
+
+        a = 0
+        if x2 - x1 != 0:
+            a = (y2 - y1)/(x2 - x1)
+        b = a * (-x1) + y1
+
+        if a != 0:
+            center_x = (height/2 - b) / a
+        else:
+            center_x = x1
+
+        # y = - amplitude * sin(2π * x/W + phase) + H/2
+        # y = ax + b
+
+        # ax + b + 振幅(amplitude) * sin(2*pi * (x/w) + 位相(phase)) - H/2
+        # 微分
+        # a + amplitude * 2π/W * cos(2π * (x/w) + phase)
+
+        nt_x = center_x
+        for j in range(0,1000):
+            print (nt_x)
+            fx = a * nt_x + b + amplitude * math.sin(2*math.pi * nt_x/width + phase) - height/2
+            dx = a + amplitude * 2*math.pi/width * math.cos(2*math.pi * nt_x/width + phase)
+
+            nt_x2 = nt_x - fx / dx
+
+            if abs(nt_x2 - nt_x) < newton_threshold:
+                break
+
+            nt_x = nt_x2
+
+        # 接線
+        # y = f'(nt_x)*x + (-nt_x*f'(nt_x) + f(nt_x))
+        # 法線
+        # y = - 1/f'(nt_x)*x + (nt_x*1/f'(nt_x) + f(nt_x))
+        fx = -amplitude * math.sin(2*math.pi * nt_x/width + phase) + height/2
+        dx = -amplitude * 2*math.pi/width * math.cos(2*math.pi * nt_x/width + phase)
+
+        tangent_a = dx
+        tangent_b = -nt_x*dx + fx
+
+        tx1 = 10
+        ty1 = int(tangent_a * tx1 + tangent_b)
+        tx2 = width - 10
+        ty2 = int(tangent_a * tx2 + tangent_b)
+
+        print (tangent_a, tangent_b, ty1, ty2)
+
+
+        theta = math.atan((tangent_a-a)/(1+a*tangent_a))
+        print (theta)
+        theta = theta * 180 / math.pi
+
+        print (theta)
+
+        if theta >= 80 and theta <= 100:
+            sin_bin[p] += 1
+
+print (sin_bin)
 
 while(1):
     img = cv2.resize(img, (int(width/4), int(height/4)))
