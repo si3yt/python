@@ -12,7 +12,7 @@ import exif as exif
 import rotate as rotate
 
 # 画像の読み込み
-filename = '../image/sphere_wr.jpg'
+filename = '../image/theta04.jpg'
 img    = cv2.imread(filename, 1)
 height = img.shape[0]
 width  = img.shape[1]
