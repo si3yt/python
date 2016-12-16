@@ -10,6 +10,7 @@ import trapezoidal_comparison as trapezoidal
 import function_approximation as f_approximation
 
 def line_detection(img, orthogonal_threshold):
+    img_temp = img;
     height = img.shape[0]
     width = img.shape[1]
 

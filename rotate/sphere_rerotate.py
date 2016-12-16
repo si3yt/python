@@ -12,7 +12,7 @@ import exif as exif
 import rotate as rotate
 
 # 画像の読み込み
-filename = '../image/theta04.jpg'
+filename = '../image/horizon.png'
 img    = cv2.imread(filename, 1)
 height = img.shape[0]
 width  = img.shape[1]
@@ -20,8 +20,8 @@ width  = img.shape[1]
 result = np.zeros((height, width, 3), np.uint8)
 # 回転角度
 latitude  = 50  #緯度
-longitude = 40   #経度
-angle     = 30   #角度
+longitude = 50   #経度
+angle     = 0   #角度
 # 度　→　ラジアン
 def rad_conv(a):
     a = a * math.pi / 180

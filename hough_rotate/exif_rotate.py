@@ -29,7 +29,7 @@ def exif_rotate(filename):
     zenith_x_rad = rad_conv(zenith_x)
     zenith_y_rad = rad_conv(zenith_y)
     compass_rad  = rad_conv(compass)
-    matrix = rotate.rerotate(compass_rad, zenith_y_rad, zenith_x_rad)
+    matrix = rotate.rerotate(0, zenith_y_rad, zenith_x_rad)
 
     r = height / math.pi
 
