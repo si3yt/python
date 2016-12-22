@@ -8,7 +8,6 @@ import os
 
 # create files
 import bicubic as bicubic
-import exif as exif
 import rotate as rotate
 
 # 画像の読み込み
@@ -31,15 +30,9 @@ latitude_rad  = rad_conv(-latitude)  # y軸周り
 longitude_rad = rad_conv(-longitude) # x軸周り
 angle_rad     = rad_conv(-angle)     # z軸周り
 ### main
-if __name__ == "__main__":
+def horizon_rotate(rot_angle):
 
-    #zenith_x, zenith_y, compass = exif.get_angles(filename)
-    #zenith_x_rad = rad_conv(zenith_x)
-    #zenith_y_rad = rad_conv(zenith_y)
-    #compass_rad  = rad_conv(compass)
-    #matrix = rotate.zenith_rotate(zenith_x, zenith_y, compass)
-    matrix = rotate.rerotate(longitude_rad, latitude_rad, angle_rad)
-    #matrix = rotate.rerotate(compass_rad, zenith_y_rad, zenith_x_rad)
+    matrix = rotate.rerotate(0, rot_angle, 0)
 
     r = height / math.pi
 
@@ -74,18 +67,4 @@ if __name__ == "__main__":
             result[h][w][1] = rgb[1]
             result[h][w][2] = rgb[2]
 
-    # ウィンドウの表示形式の設定
-     # 第一引数：ウィンドウを識別するための名前
-     # 第二引数：ウィンドウの表示形式
-      # cv2.WINDOW_AUTOSIZE：デフォルト。ウィンドウ固定表示
-      # cv2.WINDOW_NORMAL：ウィンドウのサイズを変更可能にする
-    cv2.namedWindow("sphere_rotate")
-
-    while(1):
-        cv2.imshow("sphere_rotate", result)
-        k = cv2.waitKey(1)
-        if k == 27: # ESCキーで終了
-            cv2.imwrite("detected.jpg", result)
-            break
-
-    cv2.destroyAllWindows()
+    return r, result

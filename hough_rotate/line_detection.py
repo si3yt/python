@@ -9,7 +9,7 @@ import hough_conversion as hough
 import trapezoidal_comparison as trapezoidal
 import function_approximation as f_approximation
 
-def line_detection(img, orthogonal_threshold):
+def line_detection(img, amp):
     img_temp = img;
     height = img.shape[0]
     width = img.shape[1]
@@ -20,6 +20,6 @@ def line_detection(img, orthogonal_threshold):
     # 台形の面積比較による絞り込み
     trapezoid_line = trapezoidal.trapezoidal_comparison(degree_line, 100, 1700, 40000, 2)
 
-    vertex_x, vertex_y = f_approximation.approximation_vertex(trapezoid_line, width, height, 1000, 0.00001, orthogonal_threshold)
+    vertex_x, vertex_y = f_approximation.approximation_vertex(trapezoid_line, width, height, 1000, 0.00001, 3, amp)
 
     return vertex_x, vertex_y

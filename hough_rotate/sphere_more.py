@@ -29,54 +29,63 @@ if __name__ == "__main__":
     height = img.shape[0]
     width  = img.shape[1]
 
-    result = np.zeros((height, width, 3), np.uint8)
-    #for i in (5,4,3,2,1):
     # 結果画像配列作成
-    result = np.zeros((height, width, 3), np.uint8)
 
     r = height / math.pi
+    for amp in (300, 100, 50, 20, 10):
 
-    print ('line detection')
-    vertex_x, vertex_y = line.line_detection(img, 3)
-    transverse = (vertex_x - width/4) / r
-    longitudinal = (height/2 - vertex_y) / r
+        result = np.zeros((height, width, 3), np.uint8)
 
-    print ('make rotate matrix')
-    matrix = rotate.rerotate(transverse, longitudinal, 0)
+        print ('line detection')
+        vertex_x, vertex_y = line.line_detection(img, amp)
+        transverse = (vertex_x - width/4) / r
+        longitudinal = (height/2 - vertex_y) / r
 
-    print ('rotate image')
-    for h in range(height):
-        for w in range(width):
-            # 円筒平面 → 球(極座標)
-            sphere_lat_rad = h / r
-            sphere_lon_rad = w / r
+        print ('make rotate matrix')
+        matrix = rotate.rerotate(transverse, longitudinal, 0)
 
-            x = r * math.sin(sphere_lat_rad) * math.cos(sphere_lon_rad)
-            y = r * math.sin(sphere_lat_rad) * math.sin(sphere_lon_rad)
-            z = r * math.cos(sphere_lat_rad)
+        print ('rotate image')
+        for h in range(height):
+            for w in range(width):
+                # 円筒平面 → 球(極座標)
+                sphere_lat_rad = h / r
+                sphere_lon_rad = w / r
 
-            new_x = x * matrix[0,0] + y * matrix[0,1] + z * matrix[0,2]
-            new_y = x * matrix[1,0] + y * matrix[1,1] + z * matrix[1,2]
-            new_z = x * matrix[2,0] + y * matrix[2,1] + z * matrix[2,2]
+                x = r * math.sin(sphere_lat_rad) * math.cos(sphere_lon_rad)
+                y = r * math.sin(sphere_lat_rad) * math.sin(sphere_lon_rad)
+                z = r * math.cos(sphere_lat_rad)
 
-            distance = math.sqrt(new_x**2 + new_y**2 + new_z**2)
-            theta    = math.acos(new_z/distance)                 # 値域:0~pi   # 緯度
-            phi      = math.atan2(new_y,new_x)                   # 値域:-pi~pi # 経度
+                new_x = x * matrix[0,0] + y * matrix[0,1] + z * matrix[0,2]
+                new_y = x * matrix[1,0] + y * matrix[1,1] + z * matrix[1,2]
+                new_z = x * matrix[2,0] + y * matrix[2,1] + z * matrix[2,2]
 
-            if phi < 0:
-                phi = 2 * math.pi + phi
+                distance = math.sqrt(new_x**2 + new_y**2 + new_z**2)
+                theta    = math.acos(new_z/distance)                 # 値域:0~pi   # 緯度
+                phi      = math.atan2(new_y,new_x)                   # 値域:-pi~pi # 経度
 
-            ## 円筒展開
-            cylinder_x = (phi   * r) / width  * (width  - 1) # 経度 * 球体半径
-            cylinder_y = (theta * r) / height * (height - 1) # 経度 * 球体半径
+                if phi < 0:
+                    phi = 2 * math.pi + phi
 
-            rgb = bicubic.bicubic(cylinder_x, cylinder_y, img, height, width)
+                ## 円筒展開
+                cylinder_x = (phi   * r) / width  * (width  - 1) # 経度 * 球体半径
+                cylinder_y = (theta * r) / height * (height - 1) # 経度 * 球体半径
 
-            result[h][w][0] = rgb[0]
-            result[h][w][1] = rgb[1]
-            result[h][w][2] = rgb[2]
+                rgb = bicubic.bicubic(cylinder_x, cylinder_y, img, height, width)
 
-    img = result
+                result[h][w][0] = rgb[0]
+                result[h][w][1] = rgb[1]
+                result[h][w][2] = rgb[2]
+
+        img = result
+        '''
+        print ('show result image')
+        while(1):
+            result = cv2.resize(result, (int(width/4), int(height/4)))
+            cv2.imshow("sphere_rotate", result)
+            k = cv2.waitKey(1)
+            if k == 27: # ESCキーで終了
+                break
+        '''
 
     print ('show result image')
     while(1):

@@ -22,7 +22,7 @@ def rad_conv(a):
 if __name__ == "__main__":
     # 画像の読み込み
     print ('program start')
-    filename = '../image/dist03.jpg'
+    filename = '../image/theta04.jpg'
 
     print ('start exif rotate')
     filename = exif_rotate.exif_rotate(filename)
@@ -37,12 +37,12 @@ if __name__ == "__main__":
     r = height / math.pi
 
     print ('line detection')
-    vertex_x, vertex_y = line.line_detection(img, 3)
+    vertex_x, vertex_y = line.line_detection(img, 300)
     transverse = (vertex_x - width/4) / r
     longitudinal = (height/2 - vertex_y) / r
 
     print ('make rotate matrix')
-    matrix = rotate.rerotate(transverse, longitudinal, 0)
+    matrix = rotate.rerotate(transverse, longitudina, 0)
 
     print ('rotate image')
     for h in range(height):
