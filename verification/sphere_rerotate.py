@@ -32,7 +32,7 @@ angle_rad     = rad_conv(-angle)     # z軸周り
 ### main
 def horizon_rotate(rot_angle):
 
-    matrix = rotate.rerotate(0, rot_angle, 0)
+    matrix = rotate.rerotate(0, 0, rot_angle)
 
     r = height / math.pi
 
