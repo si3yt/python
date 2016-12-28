@@ -11,17 +11,17 @@ def rad_conv(a):
 
 plt.figure(figsize=(23,10))
 
-angle = 80
+angle = 90
 angle_rad = rad_conv(angle)
 r, im = horizon.horizon_rotate(angle_rad)
 plt.imshow(im)
 
 x = np.linspace(-math.pi, math.pi, 360)
-xd = np.arctan2( np.cos(angle_rad) * np.sin(x) ,np.cos(x) ) / math.pi * 100+100
+xd = np.arctan2( np.cos(angle_rad) * np.sin(x) ,np.cos(x) ) / math.pi * 100+99.5
 
-plt.plot(xd, np.arctan2(np.sin(angle_rad) * np.sin(x), np.sqrt(1-(np.sin(x))**2 * (np.sin(angle_rad)**2))) / math.pi * 100 + 50 )
-plt.xlim(0,200)
-plt.ylim(100, 0)
+plt.plot(xd, np.arctan2(np.sin(angle_rad) * np.sin(x), np.sqrt(1-(np.sin(x))**2 * (np.sin(angle_rad)**2))) / math.pi * 100 + 49.5 )
+plt.xlim(-10,210)
+plt.ylim(110, -10)
 plt.show()
 
 #plt.savefig('output.png')
