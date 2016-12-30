@@ -7,11 +7,16 @@ import numpy as np
 import list_operation as list_opr
 import linear_function as linear
 
+def rad_conv(a):
+    a = a * math.pi / 180
+    return a
+
 def newton(a, b, center_x, width, height, amplitude, phase, newton_count, newton_threshold):
     x = center_x
+    amp_rad = rad_conv(amplitude)
     for j in range(0,newton_count):
-        fx = a * x + b + amplitude * math.sin(2*math.pi * x/width + phase) - height/2
-        dx = a + amplitude * 2*math.pi/width * math.cos(2*math.pi * x/width + phase)
+        fx = a * x + b + width/2*math.pi * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(x+phase)*math.cos(amp_rad), math.cos(x+phase)))) + height/2
+        dx = a + (width*math.sin(amp_rad)*math.cos(amp_rad)*math.cos(math.atan2(math.sin(x+phase)*math.cos(amp_rad),math.cos(x+phase)))) / (2*math.pi*((math.cos(x+phase))**2)*(math.sin(x+phase)**2)*(math.cos(amp_rad)**2)*math.sqrt(1-(math.sin(amp_rad)**2)*(math.sin(math.atan2(math.sin(x+phase)*math.cos(amp_rad), math.cos(x+phase))))))
 
         x2 = 0
         if dx != 0:
@@ -31,7 +36,7 @@ def tangent_angle(trapezoid_line, i, width, height, amplitude, phase, newton_cou
 
     center_x = linear.center_slice(a, b, height, x1)
 
-    # y = - amplitude * sin(2π * x/W + phase) + H/2
+    # y = - W/2π * asin(sin(amp)*sin(atan(tan(x+phs)*cos(amp)))) + H/2
     # y = ax + b
 
     # ax + b + 振幅(amplitude) * sin(2*pi * (x/w) + 位相(phase)) - H/2
@@ -43,8 +48,9 @@ def tangent_angle(trapezoid_line, i, width, height, amplitude, phase, newton_cou
 
     # 接線
     # y = f'(nt_x)*x + (-nt_x*f'(nt_x) + f(nt_x))
-    fx = -amplitude * math.sin(2*math.pi * nt_x/width + phase) + height/2
-    dx = -amplitude * 2*math.pi/width * math.cos(2*math.pi * nt_x/width + phase)
+    amp_rad = rad_conv(amplitude)
+    fx = - width/2*math.pi * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(nt_x+phase)*math.cos(amp_rad), math.cos(nt_x+phase)))) + height/2
+    dx = - (width*math.sin(amp_rad)*math.cos(amp_rad)*math.cos(math.atan2(math.sin(nt_x+phase)*math.cos(amp_rad),math.cos(nt_x+phase)))) / (2*math.pi*((math.cos(nt_x+phase))**2)*(math.sin(nt_x+phase)**2)*(math.cos(amp_rad)**2)*math.sqrt(1-(math.sin(amp_rad)**2)*(math.sin(math.atan2(math.sin(nt_x+phase)*math.cos(amp_rad), math.cos(nt_x+phase))))))
 
     tangent_a = dx
     tangent_b = -nt_x*dx + fx
