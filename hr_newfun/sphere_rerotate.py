@@ -36,15 +36,19 @@ if __name__ == "__main__":
 
     r = height / math.pi
 
-    print ('line detection')
-    vertex_x, vertex_y = line.line_detection(img, 50)
-    transverse = (vertex_x - width/4) / r
-    longitudinal = (height/2 - vertex_y) / r
+    print ('end exif rotate')
+    print ('start line detection')
 
-    print ('make rotate matrix')
-    matrix = rotate.rerotate(transverse, longitudina, 0)
+    vertex_x, vertex_y = line.line_detection(img, 45)
+    transverse = (width/4 - vertex_x) / r
+    longitudinal = rad_conv(vertex_y)
 
-    print ('rotate image')
+    print ('end line detection')
+    print ('start make rotate matrix')
+
+    matrix = rotate.rerotate(transverse, 0, longitudinal)
+
+    print ('start rotate image')
     for h in range(height):
         for w in range(width):
             # 円筒平面 → 球(極座標)
@@ -76,7 +80,11 @@ if __name__ == "__main__":
             result[h][w][1] = rgb[1]
             result[h][w][2] = rgb[2]
 
+        print ('return img width : %d / %d' % (h ,height))
+
     print ('show result image')
+    print ('push esc key for exit')
+
     while(1):
         result = cv2.resize(result, (int(width/4), int(height/4)))
         cv2.imshow("sphere_rotate", result)
@@ -86,3 +94,5 @@ if __name__ == "__main__":
             break
 
     cv2.destroyAllWindows()
+
+    print ('program end')
