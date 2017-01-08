@@ -40,13 +40,13 @@ if __name__ == "__main__":
     print ('start line detection')
 
     vertex_x, vertex_y = line.line_detection(img, 45)
-    transverse = (width/4 - vertex_x) / r
-    longitudinal = rad_conv(vertex_y)
+    transverse = rad_conv(vertex_x)
+    longitudinal = rad_conv(-vertex_y)
 
     print ('end line detection')
     print ('start make rotate matrix')
 
-    matrix = rotate.rerotate(transverse, 0, longitudinal)
+    matrix = rotate.rerotate(transverse, longitudinal, 0)
 
     print ('start rotate image')
     for h in range(height):

@@ -41,8 +41,10 @@ if __name__ == "__main__":
     transverse = (vertex_x - width/4) / r
     longitudinal = (height/2 - vertex_y) / r
 
+    print (transverse, longitudinal)
+
     print ('make rotate matrix')
-    matrix = rotate.rerotate(transverse, longitudina, 0)
+    matrix = rotate.rerotate(transverse, longitudinal, 0)
 
     print ('rotate image')
     for h in range(height):

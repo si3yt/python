@@ -81,6 +81,7 @@ def make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, 
     phs_i = bin_max_index % phs_trans
     amp_i = bin_max_index / phs_trans
 
+
     phs_ask = phs_i * math.pi / 180
     amp_ask = amp_i
 

@@ -111,11 +111,20 @@ def make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, 
                 if tangent_bool:
                     sin_bin[amp][phs] += 1
 
-    bin_max_index = np.argmax(sin_bin)
-    phs_i = bin_max_index % phs_trans
-    amp_i = bin_max_index / phs_trans
+    sin_bin_max = np.max(sin_bin)
+    index_phs = np.array([])
+    index_amp = np.array([])
+    for phs_i in range(0, phs_trans):
+        for amp_i in range(0, amp_trans):
+            if sin_bin_max == sin_bin[amp_i][phs_i]:
+                index_phs = np.append(index_phs, phs_i)
+                index_amp = np.append(index_amp, amp_i)
+                print (amp_i, phs_i)
 
-    phs_ask = phs_i * math.pi / 180
+    phs_i = index_phs.mean()
+    amp_i = index_amp.mean()
+
+    phs_ask = phs_i
     amp_ask = amp_i
 
     return phs_ask, amp_ask
@@ -168,7 +177,7 @@ def approximation_vertex(trapezoid_line, width, height, newton_count, newton_thr
             break
     '''
 
-    sin_vertex_x = width * (phase/(2*math.pi))
+    sin_vertex_x = phase
     sin_vettex_y = amplitude
 
     return sin_vertex_x, sin_vettex_y
