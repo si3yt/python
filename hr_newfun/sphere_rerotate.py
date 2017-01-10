@@ -39,7 +39,7 @@ if __name__ == "__main__":
     print ('end exif rotate')
     print ('start line detection')
 
-    vertex_x, vertex_y = line.line_detection(img, 45)
+    vertex_x, vertex_y = line.line_detection(img, 45, filename)
     transverse = rad_conv(vertex_x)
     longitudinal = rad_conv(-vertex_y)
 

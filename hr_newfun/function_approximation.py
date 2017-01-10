@@ -136,22 +136,11 @@ def approximation_draw(trapezoid_line, width, height, newton_count, newton_thres
     # 求まった関数の位相
     phase, amplitude = make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold)
 
-    filename = '../image/theta04_cor.jpg'
-    img    = cv2.imread(filename, 1)
-
     for i in range(0,len(trapezoid_line)):
         tangent_bool = tangent_angle(trapezoid_line, i, width, height, amplitude, phase, newton_count, newton_threshold, orthogonal_threshold)
         if tangent_bool:
             x1, y1, x2, y2 = list_opr.value_take_out(trapezoid_line, i)
             draw_line.append((x1,y1,x2,y2))
-            cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-
-    while(1):
-        img = cv2.resize(img, (int(width/4), int(height/4)))
-        cv2.imshow("sphere_rotate", img)
-        k = cv2.waitKey(1)
-        if k == 27: # ESCキーで終了
-            break
 
     return draw_line
 
@@ -181,3 +170,28 @@ def approximation_vertex(trapezoid_line, width, height, newton_count, newton_thr
     sin_vettex_y = amplitude
 
     return sin_vertex_x, sin_vettex_y
+
+def approximation_dv(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, amplitude_lim,filename):
+    # 出力配列
+    draw_line = []
+
+    # 求まった関数の位相
+    phase, amplitude = make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, amplitude_lim)
+
+    amp_rad = rad_conv(amplitude)
+    phs_rad = rad_conv(phase)
+    img_temp = cv2.imread(filename, 1)
+    for i in range(0,len(trapezoid_line)):
+        tangent_bool = tangent_angle(trapezoid_line, i, width, height, amplitude, phs_rad, newton_count, newton_threshold, orthogonal_threshold)
+        if tangent_bool:
+            x1, y1, x2, y2 = list_opr.value_take_out(trapezoid_line, i)
+            draw_line.append((x1,y1,x2,y2))
+            cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
+
+    for nt_x in range(0,width):
+        fx = - width/(2*math.pi) * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(2*math.pi *nt_x/width+phs_rad), math.cos(amp_rad)*math.cos(2*math.pi *nt_x/width+phs_rad)))) + height/2
+        cv2.line(img_temp,(nt_x,int(fx-5)),(nt_x,int(fx+5)),(0,255,00),2)
+
+    cv2.imwrite("func.jpg", img_temp)
+
+    return draw_line, phase, amplitude
