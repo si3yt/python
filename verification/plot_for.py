@@ -11,7 +11,7 @@ def rad_conv(a):
 
 plt.figure(figsize=(23,10))
 
-for angle in [70]:#0, 10, 20, 30, 40, 50, 60, 70, 80, 90]:
+for angle in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]:
     angle_rad = rad_conv(angle)
 
     x = np.linspace(-math.pi, math.pi, 180)
