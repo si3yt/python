@@ -35,7 +35,10 @@ def cross_make(line, i, top, bottom):
 
     return cross1_x, cross2_x
 
-def trapezoidal_make(dense, line1, line2, label, top, bottom, t_threshold):
+def trapezoidal_make(line1, line2, label, top, bottom, t_threshold):
+    dense_count = 0
+
+    append_line = []
     # 注目直線
     for i in range(0,len(line1)):
         if label[i] == 0:
@@ -44,7 +47,7 @@ def trapezoidal_make(dense, line1, line2, label, top, bottom, t_threshold):
 
             # 比較対象直線
             for j in range(0,len(line2)):
-                if j != i and label[j] == 0:
+                if j != line1[i][4] and label[j] == 0:
                     # 比較直線と横線との交点
                     cross21_x, cross22_x = cross_make(line2, j, top, bottom)
 
@@ -54,20 +57,23 @@ def trapezoidal_make(dense, line1, line2, label, top, bottom, t_threshold):
                     # 台形面積による絞り込み
                     if dense_judge(trapezoid, t_threshold):
                         # 値の取り出し
-                        x21, y21, x22, y22 = list_opr.value_take_out(line2, j)
-                        dense_line.append((x11,y11,x12,y12,j))
-
+                        x1, y1, x2, y2 = list_opr.value_take_out(line2, j)
+                        append_line.append((x1,y1,x2,y2,j))
+                        label[j] = 1
+                        dense_count += 1
+    return append_line, label, dense_count
 
 def trapezoidal_comparison(degree_line, slice_line_top, slice_line_bottom, trapezoid_threshold, dense_threshold):
     # 絞り込み後格納配列
     trapezoid_line = []
     # 密集判定ラベル
     dense_label = np.zeros(len(degree_line))
-    # 密集配列
-    dense_line = []
 
     for i in range(0,len(degree_line)):
         if dense_label[i] == 0:
+            # 密集配列
+            dense_line = []
+
             # 注目直線と横線との交点
             cross11_x, cross12_x = cross_make(degree_line, i, slice_line_top, slice_line_bottom)
 
@@ -83,22 +89,36 @@ def trapezoidal_comparison(degree_line, slice_line_top, slice_line_bottom, trape
                     # 台形面積による絞り込み
                     if dense_judge(trapezoid, trapezoid_threshold):
                         # 値の取り出し
-                        x21, y21, x22, y22 = list_opr.value_take_out(degree_line, j)
-                        dense_line.append((x11,y11,x12,y12,j))
+                        x1, y1, x2, y2 = list_opr.value_take_out(degree_line, j)
+                        dense_line.append((x1,y1,x2,y2,j))
+                        dense_label[j] = 1
 
             if len(dense_line) != 0:
+                dense_label[i] = 1
+                ox1, oy1, ox2, oy2, count = 0, 0, 0, 0, 0
+                append_line = dense_line
                 while(1):
+                    for j in range(0,len(dense_line)):
+                        x1, y1, x2, y2 = list_opr.value_take_out(dense_line, j)
+                        ox1 += x1
+                        oy1 += y1
+                        ox2 += x2
+                        oy2 += y2
+                        count += 1
+                    append_line, dense_label, dense_count = trapezoidal_make(append_line, degree_line, dense_label, slice_line_top, slice_line_bottom, trapezoid_threshold)
 
+                    dense_line = append_line
 
+                    if dense_count == 0:
+                        break
 
-
-        if len(dense_line) != 0:
-            dense_label[i] = 1
-            for k in range(0,len(dense_line)):
-                for l in range(0,len(degree_line)):
-                    if k != l and dense_label[l] == 0:
-
-
-
+                ox1 = int(ox1 / count)
+                oy1 = int(oy1 / count)
+                ox2 = int(ox2 / count)
+                oy2 = int(oy2 / count)
+                trapezoid_line.append((ox1,oy1,ox2,oy2))
+            else:
+                x1, y1, x2, y2 = list_opr.value_take_out(degree_line, i)
+                trapezoid_line.append((x1,y1,x2,y2))
 
     return trapezoid_line
