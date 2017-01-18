@@ -22,7 +22,7 @@ def rad_conv(a):
 if __name__ == "__main__":
     # 画像の読み込み
     print ('program start')
-    filename = '../image/theta04_cor.jpg'
+    filename = '../image/R0010299_xmp.jpg'
 
     print ('start exif rotate')
     #filename = exif_rotate.exif_rotate(filename)
