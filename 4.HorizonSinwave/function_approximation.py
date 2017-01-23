@@ -11,12 +11,16 @@ def rad_conv(a):
     a = a * math.pi / 180
     return a
 
+def degree_conv(a):
+    a = a * 180 / math.pi
+    return a
+
 def newton(a, b, center_x, width, height, amplitude, phase, newton_count, newton_threshold):
     x = center_x
     amp_rad = rad_conv(amplitude)
     for j in range(0,newton_count):
-        fx = a * x + b + width/(2*math.pi) * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(2*math.pi * x/width+phase), math.cos(amp_rad)*math.cos(2*math.pi * x/width+phase)))) - height/2
-        dx = a + (math.sin(amp_rad)*math.cos(amp_rad)*math.cos(math.atan2(math.sin(2*math.pi * x/width+phase),math.cos(amp_rad)*math.cos(2*math.pi * x/width+phase)))) / ((((math.cos(2*math.pi * x/width+phase))**2)*((math.cos(amp_rad))**2)+((math.sin(2*math.pi * x/width+phase))**2))*math.sqrt(1-((math.sin(amp_rad))**2)*((math.sin(math.atan2(math.sin(2*math.pi * x/width+phase),math.cos(amp_rad)*math.cos(2*math.pi * x/width+phase))))**2)))
+        fx = a * x + b - width/(2*math.pi) * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(2*math.pi * x/width+phase), math.cos(amp_rad)*math.cos(2*math.pi * x/width+phase)))) + height/2
+        dx = a - (math.sin(amp_rad)*math.cos(amp_rad)*math.cos(math.atan2(math.sin(2*math.pi * x/width+phase),math.cos(amp_rad)*math.cos(2*math.pi * x/width+phase)))) / ((((math.cos(2*math.pi * x/width+phase))**2)*((math.cos(amp_rad))**2)+((math.sin(2*math.pi * x/width+phase))**2))*math.sqrt(1-((math.sin(amp_rad))**2)*((math.sin(math.atan2(math.sin(2*math.pi * x/width+phase),math.cos(amp_rad)*math.cos(2*math.pi * x/width+phase))))**2)))
         x2 = 0
         if dx != 0:
             x2 = x - fx / dx
@@ -48,40 +52,11 @@ def tangent_angle(trapezoid_line, i, width, height, amplitude, phase, newton_cou
     # 接線
     # y = f'(nt_x)*x + (-nt_x*f'(nt_x) + f(nt_x))
     amp_rad = rad_conv(amplitude)
-    fx = - width/(2*math.pi) * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(2*math.pi *nt_x/width+phase), math.cos(amp_rad)*math.cos(2*math.pi *nt_x/width+phase)))) + height/2
-    dx = - (math.sin(amp_rad)*math.cos(amp_rad)*math.cos(math.atan2(math.sin(2*math.pi *nt_x/width+phase),math.cos(amp_rad)*math.cos(2*math.pi *nt_x/width+phase)))) / ((((math.cos(2*math.pi *nt_x/width+phase))**2)*((math.cos(amp_rad))**2)+((math.sin(2*math.pi *nt_x/width+phase))**2))*math.sqrt(1-((math.sin(amp_rad))**2)*((math.sin(math.atan2(math.sin(2*math.pi *nt_x/width+phase),math.cos(amp_rad)*math.cos(2*math.pi *nt_x/width+phase))))**2)))
+    fx = width/(2*math.pi) * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(2*math.pi *nt_x/width+phase), math.cos(amp_rad)*math.cos(2*math.pi *nt_x/width+phase)))) + height/2
+    dx = (math.sin(amp_rad)*math.cos(amp_rad)*math.cos(math.atan2(math.sin(2*math.pi *nt_x/width+phase),math.cos(amp_rad)*math.cos(2*math.pi *nt_x/width+phase)))) / ((((math.cos(2*math.pi *nt_x/width+phase))**2)*((math.cos(amp_rad))**2)+((math.sin(2*math.pi *nt_x/width+phase))**2))*math.sqrt(1-((math.sin(amp_rad))**2)*((math.sin(math.atan2(math.sin(2*math.pi *nt_x/width+phase),math.cos(amp_rad)*math.cos(2*math.pi *nt_x/width+phase))))**2)))
 
     tangent_a = dx
     tangent_b = -nt_x*dx + fx
-
-    '''
-    filename = '../image/theta04_cor.jpg'
-    img    = cv2.imread(filename, 1)
-
-    for fxi in range(0, width):
-        fxx = - width/(2*math.pi) * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(2*math.pi *fxi/width+phase), math.cos(amp_rad)*math.cos(2*math.pi *fxi/width+phase)))) + height/2
-        cv2.line(img,(int(width/2),int(height/2)),(int(fxi),int(fxx)),(255,0,0),2)
-
-    x1, y1, x2, y2 = list_opr.value_take_out(trapezoid_line, i)
-    cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-
-    fxx = - width/(2*math.pi) * math.asin( math.sin(amp_rad) * math.sin(math.atan2(math.sin(2*math.pi *nt_x/width+phase), math.cos(amp_rad)*math.cos(2*math.pi *nt_x/width+phase)))) + height/2
-    cv2.line(img,(int(width/2),int(height/2)),(int(nt_x),int(fxx)),(0,255,0),2)
-
-    tx1, tx2 = linear.two_slice(tangent_a, tangent_b, -2000, 2000, center_x)
-    ty1 = tangent_a * tx1 + tangent_b
-    ty2 = tangent_a * tx2 + tangent_b
-    cv2.line(img,(int(tx1),int(ty1)),(int(tx2),int(ty2)),(0,255,0),2)
-
-    print (tangent_a, tx1, ty1, tx2, ty2)
-
-    while(1):
-        img = cv2.resize(img, (int(width/4), int(height/4)))
-        cv2.imshow("sphere_rotate", img)
-        k = cv2.waitKey(1)
-        if k == 27: # ESCキーで終了
-            break
-    '''
 
     # 接線と直線との角度
     theta = 0
@@ -94,22 +69,44 @@ def tangent_angle(trapezoid_line, i, width, height, amplitude, phase, newton_cou
     else:
         return False
 
-def make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, amplitude_lim):
+def line_orthogonal(a):
+    ort_a = -1 / a
+    return ort_a
+
+def line_orthogonal_intersection(a, b, ort_a, inter_y):
+    inter_x = (inter_y - b) / a
+    ort_b = inter_x * (a - ort_a) + b
+    return inter_x , ort_b
+
+def rotation_angle(a, x, y, width, height):
+    phs = math.atan((-a*math.pi*(y-height/2))/height) - (2*math.pi*x)/width
+    amp = 0
+    if height*math.sin((2*math.pi*x)/width + phs) != 0:
+        amp = ((y-height/2)*math.pi)/(height*math.sin((2*math.pi*x)/width + phs))
+    phs = degree_conv(phs) + 180
+    amp = degree_conv(amp) + 90
+    print (phs, amp)
+    return round(phs), round(amp)
+
+def get_phs(trapezoid_line, i, width, height, y):
+    x1, y1, x2, y2 = list_opr.value_take_out(trapezoid_line, i)
+    a, b = linear.ab(x1, y1, x2, y2)
+    ort_a = line_orthogonal(a)
+    x, ort_b = line_orthogonal_intersection(a, b, ort_a, y)
+    phs, amp = rotation_angle(a, x, y, width, height)
+    return phs, amp
+
+def make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold):
     # sin用bin
     # 1度ずつ360度ずらす
     phs_trans = 360
-    amp_trans = amplitude_lim
+    amp_trans = 180
     sin_bin = [[0 for i in range(phs_trans)] for j in range(amp_trans)]
 
-    for phs in range(0,phs_trans):
-        phase = phs
-        # 角度 → ラジアン
-        phase = rad_conv(phase)
-        for amp in range(0,amp_trans):#range(0,amp_trans):
-            for i in range(0,len(trapezoid_line)):
-                tangent_bool = tangent_angle(trapezoid_line, i, width, height, amp, phase, newton_count, newton_threshold, orthogonal_threshold)
-                if tangent_bool:
-                    sin_bin[amp][phs] += 1
+    for i in range(0,len(trapezoid_line)):
+        for y in range(int(height/4), int(height*3/4)):
+            phs, amp = get_phs(trapezoid_line, i, width, height, y)
+            sin_bin[amp][phs] += 1
 
     sin_bin_max = np.max(sin_bin)
     index_phs = np.array([])
@@ -119,13 +116,13 @@ def make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, 
             if sin_bin_max == sin_bin[amp_i][phs_i]:
                 index_phs = np.append(index_phs, phs_i)
                 index_amp = np.append(index_amp, amp_i)
-                print (amp_i, phs_i)
+                #print (amp_i, phs_i)
 
     phs_i = index_phs.mean()
     amp_i = index_amp.mean()
 
-    phs_ask = phs_i
-    amp_ask = amp_i
+    phs_ask = phs_i - 180
+    amp_ask = amp_i - 90
 
     return phs_ask, amp_ask
 
@@ -171,12 +168,12 @@ def approximation_vertex(trapezoid_line, width, height, newton_count, newton_thr
 
     return sin_vertex_x, sin_vettex_y
 
-def approximation_dv(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, amplitude_lim,filename):
+def approximation_dv(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, filename):
     # 出力配列
     draw_line = []
 
     # 求まった関数の位相
-    phase, amplitude = make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, amplitude_lim)
+    phase, amplitude = make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold)
 
     amp_rad = rad_conv(amplitude)
     phs_rad = rad_conv(phase)

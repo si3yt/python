@@ -9,7 +9,7 @@ import hough_conversion as hough
 import trapezoidal_comparison as trapezoidal
 import function_approximation as f_approximation
 
-def line_detection(img, amp, filename):
+def line_detection(img, filename):
     height = img.shape[0]
     width = img.shape[1]
 
@@ -34,7 +34,7 @@ def line_detection(img, amp, filename):
 
     print ('end trapezoid_line')
 
-    draw_line, vertex_x, vertex_y = f_approximation.approximation_dv(trapezoid_line, width, height, 1000, 0.00001, 3, amp, filename)
+    draw_line, vertex_x, vertex_y = f_approximation.approximation_dv(trapezoid_line, width, height, 1000, 0.00001, 3, filename)
 
     img_temp = cv2.imread(filename, 1)
     for i in range(0,len(draw_line)):

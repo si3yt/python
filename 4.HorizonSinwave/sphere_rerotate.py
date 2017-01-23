@@ -22,7 +22,7 @@ def rad_conv(a):
 if __name__ == "__main__":
     # 画像の読み込み
     print ('program start')
-    filename = '../image/R0010299_xmp.jpg'
+    filename = '../image/theta04_cor.jpg'
 
     print ('start exif rotate')
     #filename = exif_rotate.exif_rotate(filename)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     print ('end exif rotate')
     print ('start line detection')
 
-    vertex_x, vertex_y = line.line_detection(img, 45, filename)
+    vertex_x, vertex_y = line.line_detection(img, filename)
     transverse = rad_conv(vertex_x)
     longitudinal = rad_conv(-vertex_y)
 
