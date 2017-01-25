@@ -25,3 +25,7 @@ def two_slice(a, b, top, bottom, x):
         cross1_x = cross2_x = x
 
     return cross1_x, cross2_x
+
+def get_y(a, b, x):
+    y = a * x + b
+    return y

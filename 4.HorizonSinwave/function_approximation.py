@@ -79,7 +79,7 @@ def line_orthogonal_intersection(a, b, ort_a, inter_y):
     return inter_x , ort_b
 
 def rotation_angle(a, x, y, width, height):
-    phs = math.atan((-a*math.pi*(y-height/2))/height) - (2*math.pi*x)/width
+    phs = math.atan2((math.pi*(y-height/2)),a * height) - (2*math.pi*x)/width
     amp = 0
     if height*math.sin((2*math.pi*x)/width + phs) != 0:
         amp = ((y-height/2)*math.pi)/(height*math.sin((2*math.pi*x)/width + phs))
@@ -88,15 +88,31 @@ def rotation_angle(a, x, y, width, height):
     print (phs, amp)
     return round(phs), round(amp)
 
-def get_phs(trapezoid_line, i, width, height, y):
+def get_phs(trapezoid_line, i, width, height, y, filename):
     x1, y1, x2, y2 = list_opr.value_take_out(trapezoid_line, i)
     a, b = linear.ab(x1, y1, x2, y2)
     ort_a = line_orthogonal(a)
     x, ort_b = line_orthogonal_intersection(a, b, ort_a, y)
-    phs, amp = rotation_angle(a, x, y, width, height)
+    phs, amp = rotation_angle(ort_a, x, y, width, height)
+    ox1, ox2 = linear.two_slice(ort_a, ort_b, int(ort_b-500), int(ort_b+500), int(width/2))
+    # y座標軸は上が0、下に伸びる
+    img_temp = cv2.imread(filename, 1)
+    cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
+    cv2.line(img_temp,(int(ox1),int(ort_b-500)),(int(ox2),int(ort_b+500)),(0,0,255),2)
+    print (y, x, ort_b)
+    print (amp, phs)
+    for x in range(0,width):
+        fx = - height/math.pi * rad_conv(amp-90) * math.sin((2*math.pi *x/width+rad_conv(phs-180))) + height/2
+        cv2.line(img_temp,(x,int(fx-5)),(x,int(fx+5)),(0,255,00),2)
+    while(1):
+        img_temp = cv2.resize(img_temp, (int(width/4), int(height/4)))
+        cv2.imshow("sessen", img_temp)
+        k = cv2.waitKey(1)
+        if k == 27:
+            break
     return phs, amp
 
-def make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold):
+def make_sin_bin(trapezoid_line, width, height, filename):
     # sin用bin
     # 1度ずつ360度ずらす
     phs_trans = 360
@@ -105,7 +121,7 @@ def make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, 
 
     for i in range(0,len(trapezoid_line)):
         for y in range(int(height/4), int(height*3/4)):
-            phs, amp = get_phs(trapezoid_line, i, width, height, y)
+            phs, amp = get_phs(trapezoid_line, i, width, height, y, filename)
             sin_bin[amp][phs] += 1
 
     sin_bin_max = np.max(sin_bin)
@@ -126,54 +142,12 @@ def make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, 
 
     return phs_ask, amp_ask
 
-def approximation_draw(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold):
-    # 出力配列
-    draw_line = []
-
-    # 求まった関数の位相
-    phase, amplitude = make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold)
-
-    for i in range(0,len(trapezoid_line)):
-        tangent_bool = tangent_angle(trapezoid_line, i, width, height, amplitude, phase, newton_count, newton_threshold, orthogonal_threshold)
-        if tangent_bool:
-            x1, y1, x2, y2 = list_opr.value_take_out(trapezoid_line, i)
-            draw_line.append((x1,y1,x2,y2))
-
-    return draw_line
-
-def approximation_vertex(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, amplitude_lim):
-    # 求まった関数の位相
-    phase, amplitude = make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, amplitude_lim)
-
-    '''
-    filename = '../image/theta04_cor.jpg'
-    img    = cv2.imread(filename, 1)
-
-    for i in range(0,len(trapezoid_line)):
-        tangent_bool = tangent_angle(trapezoid_line, i, width, height, amplitude, phase, newton_count, newton_threshold, orthogonal_threshold)
-        if tangent_bool:
-            x1, y1, x2, y2 = list_opr.value_take_out(trapezoid_line, i)
-            cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-
-    while(1):
-        img = cv2.resize(img, (int(width/4), int(height/4)))
-        cv2.imshow("sphere_rotate", img)
-        k = cv2.waitKey(1)
-        if k == 27: # ESCキーで終了
-            break
-    '''
-
-    sin_vertex_x = phase
-    sin_vettex_y = amplitude
-
-    return sin_vertex_x, sin_vettex_y
-
 def approximation_dv(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold, filename):
     # 出力配列
     draw_line = []
 
     # 求まった関数の位相
-    phase, amplitude = make_sin_bin(trapezoid_line, width, height, newton_count, newton_threshold, orthogonal_threshold)
+    phase, amplitude = make_sin_bin(trapezoid_line, width, height, filename)
 
     amp_rad = rad_conv(amplitude)
     phs_rad = rad_conv(phase)
