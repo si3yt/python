@@ -4,45 +4,46 @@ import math
 import numpy as np
 
 #import files
+import constant as const
 import list_operation as list_opr
 import hough_conversion as hough
 import trapezoidal_comparison as trapezoidal
 import function_approximation as f_approximation
 
-def line_detection(img, filename):
+# make output image
+def output_img(line):
+    filename = const.get_filename()
+    img_temp = cv2.imread(filename, 1)
+    for i in range(0,len(line)):
+        x1, y1, x2, y2 = list_opr.adaptation_value(line, i)
+        cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
+    return img_temp
+
+# line function
+def line_detection(img):
     height = img.shape[0]
     width = img.shape[1]
 
-    # ハフ変換、角度の絞り込み
-    degree_line = hough.hough_lines(img, width, 100, 10)
-
-    img_temp = cv2.imread(filename, 1)
-    for i in range(0,len(degree_line)):
-        x1, y1, x2, y2 = list_opr.value_take_out(degree_line, i)
-        cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
+    print ('-- Start hough conversion ---')
+    # hough conversion
+    # angle narrowing down
+    degree_line = hough.hough_lines(img)
+    # output degree line
+    img_temp = output_img(degree_line)
     cv2.imwrite("degree.jpg", img_temp)
+    print ('== End hough conversion ==')
 
-    print ('end degree_line')
-
-    # 台形の面積比較による絞り込み
-    trapezoid_line = trapezoidal.trapezoidal_comparison(degree_line, 100, 1700, 40000, 2)
-    img_temp = cv2.imread(filename, 1)
-    for i in range(0,len(trapezoid_line)):
-        x1, y1, x2, y2 = list_opr.value_take_out(trapezoid_line, i)
-        cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
+    print ('-- Start trapezoid area comparison --')
+    # trapezoid area comparison
+    trapezoid_line = trapezoidal.trapezoidal_comparison(degree_line)
+    # output trapezoid line
+    img_temp = output_img(trapezoid_line)
     cv2.imwrite("trapezoid.jpg", img_temp)
+    print ('== End trapezoid area comparison ==')
 
-    print ('end trapezoid_line')
-
-    draw_line, vertex_x, vertex_y = f_approximation.approximation_dv(trapezoid_line, width, height, 1000, 0.00001, 3, filename)
-
-    img_temp = cv2.imread(filename, 1)
-    for i in range(0,len(draw_line)):
-        x1, y1, x2, y2 = list_opr.value_take_out(draw_line, i)
-        cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
-    cv2.imwrite("draw.jpg", img_temp)
-
-    print ('end draw_line')
-
+    print ('-- Start approximation function --')
+    # approximation function
+    vertex_x, vertex_y = f_approximation.approximation_func(trapezoid_line)
+    print ('== End approximation function ==')
 
     return vertex_x, vertex_y

@@ -7,92 +7,59 @@ import matplotlib.image as mpimg
 import os
 
 # create files
+import constant as const
+import conversion as conv
 import bicubic as bicubic
 import exif as exif
 import rotate as rotate
 import exif_rotate as exif_rotate
 import line_detection as line
-
-# 度　→　ラジアン
-def rad_conv(a):
-    a = a * math.pi / 180
-    return a
+import rgb_operation as rgb_opr
 
 ### main
 if __name__ == "__main__":
-    # 画像の読み込み
-    print ('program start')
-    filename = '../image/theta04_cor.jpg'
+    # read image
+    print ('--- Program start ---')
+    filename = const.get_filename()
 
-    print ('start exif rotate')
-    #filename = exif_rotate.exif_rotate(filename)
+    print ('Play exif rotate? Y or N')
+    input_bool = input('>> ')
+    if input_bool == 'Y':
+        print ('--- Start exif rotate ---')
+        filename = exif_rotate.exif_rotate()
+        const.set_filename(filename)
+        print ('=== End exif rotate ===')
 
     img    = cv2.imread(filename, 1)
     height = img.shape[0]
     width  = img.shape[1]
 
-    # 結果画像配列作成
-    result = np.zeros((height, width, 3), np.uint8)
+    print ('--- Start line detection ---')
+    vertex_x, vertex_y = line.line_detection(img)
+    transverse = conv.get_rad(vertex_x)
+    longitudinal = conv.get_rad(-vertex_y)
+    print ('=== End line detection ===')
 
-    r = height / math.pi
-
-    print ('end exif rotate')
-    print ('start line detection')
-
-    vertex_x, vertex_y = line.line_detection(img, filename)
-    transverse = rad_conv(vertex_x)
-    longitudinal = rad_conv(-vertex_y)
-
-    print ('end line detection')
-    print ('start make rotate matrix')
-
+    print ('--- Start make rotate matrix ---')
+    #matrix = rotate.rotate(transverse, 0, -longitudinal)
     matrix = rotate.rerotate(transverse, longitudinal, 0)
+    print ('=== End make rotate matrix ===')
 
-    print ('start rotate image')
-    for h in range(height):
-        for w in range(width):
-            # 円筒平面 → 球(極座標)
-            sphere_lat_rad = h / r
-            sphere_lon_rad = w / r
+    print ('--- Start matrix rotate image ---')
+    # result image array
+    result = rgb_opr.adaptation_pixel(matrix)
+    print ('=== End matrix rotate image ===')
 
-            x = r * math.sin(sphere_lat_rad) * math.cos(sphere_lon_rad)
-            y = r * math.sin(sphere_lat_rad) * math.sin(sphere_lon_rad)
-            z = r * math.cos(sphere_lat_rad)
-
-            new_x = x * matrix[0,0] + y * matrix[0,1] + z * matrix[0,2]
-            new_y = x * matrix[1,0] + y * matrix[1,1] + z * matrix[1,2]
-            new_z = x * matrix[2,0] + y * matrix[2,1] + z * matrix[2,2]
-
-            distance = math.sqrt(new_x**2 + new_y**2 + new_z**2)
-            theta    = math.acos(new_z/distance)                 # 値域:0~pi   # 緯度
-            phi      = math.atan2(new_y,new_x)                   # 値域:-pi~pi # 経度
-
-            if phi < 0:
-                phi = 2 * math.pi + phi
-
-            ## 円筒展開
-            cylinder_x = (phi   * r) / width  * (width  - 1) # 経度 * 球体半径
-            cylinder_y = (theta * r) / height * (height - 1) # 経度 * 球体半径
-
-            rgb = bicubic.bicubic(cylinder_x, cylinder_y, img, height, width)
-
-            result[h][w][0] = rgb[0]
-            result[h][w][1] = rgb[1]
-            result[h][w][2] = rgb[2]
-
-        print ('return img width : %d / %d' % (h ,height))
-
-    print ('show result image')
-    print ('push esc key for exit')
-
+    print ('|>  Show result image ')
+    print ('!- Push esc key for exit')
+    result_resize = cv2.resize(result, (int(width/4), int(height/4)))
     while(1):
-        result = cv2.resize(result, (int(width/4), int(height/4)))
-        cv2.imshow("sphere_rotate", result)
+        cv2.imshow("sphere_rotate", result_resize)
         k = cv2.waitKey(1)
-        if k == 27: # ESCキーで終了
+        if k == 27: # ESC key finish while
             cv2.imwrite("detected.jpg", result)
             break
 
     cv2.destroyAllWindows()
 
-    print ('program end')
+    print ('=== Program end ===')

@@ -1,22 +1,23 @@
 # import
-import os
 import cv2
 import math
 import numpy as np
 
-def sinc_h(t): #sinc関数
+# sinc function
+def sinc_h(t):
     t = math.fabs(t)
     if t <= 1:
         return t**3 - 2 * t**2 + 1
     elif 1 < t <= 2:
         return -t**3 + 5 * t**2 - 8 * t + 4
-    elif 2 < t: #else
+    elif 2 < t: # else
         return 0
 
+# bicubic interpolation
 def bicubic(x, y, img, height, width):
     result_rgb = np.array([0,0,0])
 
-    if x < 0 or x >= width-1 or y < 0 or y >= height-1: #参照先が画像内でない
+    if x < 0 or x >= width-1 or y < 0 or y >= height-1: # not in image
         return [ 0, 0, 0 ]
     x1 = 1 + x - int(x)
     x2 = x - int(x)
@@ -36,24 +37,24 @@ def bicubic(x, y, img, height, width):
     top_flag          = False
     bottom_flag       = False
 
-    if x-x1 < 0:                    #左
-        if y+y1 >= height:          #左下
+    if x-x1 < 0:                    # left
+        if y+y1 >= height:          # left bottom
             left_bottom_flag = True
-        elif y-y4 < 0:              #左上
+        elif y-y4 < 0:              # left top
             left_top_flag = True
         else:
             left_flag = True
-    elif x+x4 >= width:             #右
-        if y+y1 >= height:          #右下
+    elif x+x4 >= width:             # right
+        if y+y1 >= height:          # right bottom
             right_bottom_flag = True
-        elif y-y4 < 0:              #右上
+        elif y-y4 < 0:              # right top
             right_top_flag = True
         else:
             right_flag = True
     elif y+y1 >= height:
-        bottom_flag = True          #下
+        bottom_flag = True          # bottom
     elif y-y4 < 0:
-        top_flag = True             #上
+        top_flag = True             # top
 
     f22 = img[int(y+y2)][int(x-x2)]
     f23 = img[int(y-y3)][int(x-x2)]
