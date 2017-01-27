@@ -12,9 +12,8 @@ import rgb_operation as rgb_opr
 import constant as const
 
 # exif zenith rotate
-def exif_rotate():
+def exif_rotate(filename):
     # read image
-    filename = const.get_filename()
     img    = cv2.imread(filename, 1)
     height = img.shape[0]
     width  = img.shape[1]
@@ -26,8 +25,8 @@ def exif_rotate():
     matrix = rotate.rerotate(0, zenith_y_rad, zenith_x_rad)
 
     # result image array
-    result = rgb_opr.adaptation_pixel(matrix)
-    
+    result = rgb_opr.adaptation_pixel(matrix, filename)
+
     # save result image
     result_filename = "exif_correction.jpg"
     cv2.imwrite(result_filename, result)

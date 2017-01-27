@@ -3,6 +3,9 @@ import cv2
 import math
 import numpy as np
 
+# import files
+import bicubic_correspondence as cor
+
 # sinc function
 def sinc_h(t):
     t = math.fabs(t)
@@ -28,156 +31,12 @@ def bicubic(x, y, img, height, width):
     y3 = 1 - y + int(y)
     y4 = 2 - y + int(y)
 
-    left_flag         = False
-    left_top_flag     = False
-    left_bottom_flag  = False
-    right_flag        = False
-    right_top_flag    = False
-    right_bottom_flag = False
-    top_flag          = False
-    bottom_flag       = False
-
-    if x-x1 < 0:                    # left
-        if y+y1 >= height:          # left bottom
-            left_bottom_flag = True
-        elif y-y4 < 0:              # left top
-            left_top_flag = True
-        else:
-            left_flag = True
-    elif x+x4 >= width:             # right
-        if y+y1 >= height:          # right bottom
-            right_bottom_flag = True
-        elif y-y4 < 0:              # right top
-            right_top_flag = True
-        else:
-            right_flag = True
-    elif y+y1 >= height:
-        bottom_flag = True          # bottom
-    elif y-y4 < 0:
-        top_flag = True             # top
-
     f22 = img[int(y+y2)][int(x-x2)]
     f23 = img[int(y-y3)][int(x-x2)]
     f32 = img[int(y+y2)][int(x+x3)]
     f33 = img[int(y-y3)][int(x+x3)]
 
-    if left_flag == True:
-        f11 = img[int(y+y1)][int(width-1)]
-        f12 = img[int(y+y2)][int(width-1)]
-        f13 = img[int(y-y3)][int(width-1)]
-        f14 = img[int(y-y4)][int(width-1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y+y1)][int(x+x4)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y-y4)][int(x+x4)]
-    elif right_flag == True:
-        f11 = img[int(y+y1)][int(x-x1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y-y4)][int(x-x1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y+y1)][int(0)]
-        f42 = img[int(y+y2)][int(0)]
-        f43 = img[int(y-y3)][int(0)]
-        f44 = img[int(y-y4)][int(0)]
-    elif bottom_flag == True:
-        f11 = img[int(y-y1)][int(math.fabs(x-x1-width)-1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y-y4)][int(x-x1)]
-        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y-y1)][int(math.fabs(x+x3-width)-1)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y-y1)][int(math.fabs(x+x4-width)-1)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y-y4)][int(x+x4)]
-    elif top_flag == True:
-        f11 = img[int(y+y1)][int(x-x1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y+y4)][int(math.fabs(x-x1-width)-1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
-        f41 = img[int(y+y1)][int(x+x4)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y+y4)][int(math.fabs(x+x4-width)-1)]
-    elif left_bottom_flag == True:
-        f11 = img[int(y-y1)][int(width-1)]
-        f12 = img[int(y+y2)][int(width-1)]
-        f13 = img[int(y-y3)][int(width-1)]
-        f14 = img[int(y-y4)][int(width-1)]
-        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y-y1)][int(math.fabs(x+x3-width)-1)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y-y1)][int(math.fabs(x+x4-width)-1)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y-y4)][int(x+x4)]
-    elif left_top_flag == True:
-        f11 = img[int(y+y1)][int(width-1)]
-        f12 = img[int(y+y2)][int(width-1)]
-        f13 = img[int(y-y3)][int(width-1)]
-        f14 = img[int(y+y4)][int(width-1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
-        f41 = img[int(y+y1)][int(x+x4)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y+y4)][int(math.fabs(x+x4-width)-1)]
-    elif right_bottom_flag == True:
-        f11 = img[int(y-y1)][int(math.fabs(x-x1-width)-1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y-y4)][int(x-x1)]
-        f21 = img[int(y-y1)][int(math.fabs(x-x2-width)-1)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y-y1)][int(math.fabs(x+x3-width))]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y-y1)][int(0)]
-        f42 = img[int(y+y2)][int(0)]
-        f43 = img[int(y-y3)][int(0)]
-        f44 = img[int(y-y4)][int(0)]
-    elif right_top_flag == True:
-        f11 = img[int(y+y1)][int(x-x1)]
-        f12 = img[int(y+y2)][int(x-x2)]
-        f13 = img[int(y-y3)][int(x+x3)]
-        f14 = img[int(y+y4)][int(math.fabs(x-x1-width)-1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y+y4)][int(math.fabs(x-x2-width)-1)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y+y4)][int(math.fabs(x+x3-width)-1)]
-        f41 = img[int(y+y1)][int(0)]
-        f42 = img[int(y+y2)][int(0)]
-        f43 = img[int(y-y3)][int(0)]
-        f44 = img[int(y+y4)][int(0)]
-    else:
-        f11 = img[int(y+y1)][int(x-x1)]
-        f12 = img[int(y+y2)][int(x-x1)]
-        f13 = img[int(y-y3)][int(x-x1)]
-        f14 = img[int(y-y4)][int(x-x1)]
-        f21 = img[int(y+y1)][int(x-x2)]
-        f24 = img[int(y-y4)][int(x-x2)]
-        f31 = img[int(y+y1)][int(x+x3)]
-        f34 = img[int(y-y4)][int(x+x3)]
-        f41 = img[int(y+y1)][int(x+x4)]
-        f42 = img[int(y+y2)][int(x+x4)]
-        f43 = img[int(y-y3)][int(x+x4)]
-        f44 = img[int(y-y4)][int(x+x4)]
+    f11, f12, f13, f14, f21, f24, f31, f34, f41, f42, f43, f44 = cor.correspondence(img, x, y, x1, x2, x3, x4, y1, y2, y3, y4, height, width)
 
     matrix_hx = np.array([ sinc_h(x1), sinc_h(x2), sinc_h(x3), sinc_h(x4) ])
     matrix_hy = np.array([ [sinc_h(y1)], [sinc_h(y2)], [sinc_h(y3)], [sinc_h(y4)] ])

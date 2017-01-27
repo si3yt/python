@@ -24,7 +24,7 @@ def hough_lines(img):
     # output array
     degree_line = []
 
-    line_extend = const.get_hough_line_extend()
+    line_extend = width = img.shape[1]
     # end points of straight line
     for i in range(0,len(lines)):
         # rho  ：distandce to line

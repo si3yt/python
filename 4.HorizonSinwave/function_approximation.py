@@ -2,6 +2,7 @@
 import cv2
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 # import files
 import constant as const
@@ -11,13 +12,13 @@ import conversion as conv
 import horizon as horizon
 
 # newton method
-def newton(a, b, center_x, amplitude, phase):
+def newton(a, b, center_x, amplitude, phase, h, w):
     x = center_x
     count = const.get_newton_count()
     threshold = const.get_newton_threshold()
     for j in range(0, count):
-        fx = horizon.get_fx0(a, b, x, amplitude, phase)
-        dx = horizon.get_dx0(a, x, amplitude, phase)
+        fx = horizon.get_fx0(a, b, x, amplitude, phase, h, w)
+        dx = horizon.get_dx0(a, x, amplitude, phase, h, w)
         x2 = 0
         if dx != 0:
             x2 = x - fx / dx
@@ -30,21 +31,19 @@ def newton(a, b, center_x, amplitude, phase):
     return x
 
 # bool angle at tangent line
-def tangent_angle(trapezoid_line, i, amplitude, phase):
-    width  = const.get_img_width()
-    height = const.get_img_height()
+def tangent_angle(trapezoid_line, i, amplitude, phase, h, w):
     x1, y1, x2, y2 = list_opr.adaptation_value(trapezoid_line, i)
     a, b = linear.get_ab(x1, y1, x2, y2)
-    center_x = linear.slice_center_x(a, b, height, x1)
+    center_x = linear.slice_center_x(a, b, h, x1)
 
     # newton method
-    nt_x = newton(a, b, center_x, amplitude, phase)
+    nt_x = newton(a, b, center_x, amplitude, phase, h, w)
 
     # ask tangent line
     # horizon
-    fx = horizon.get_fx(nt_x, amplitude, phase)
+    fx = horizon.get_fx(nt_x, amplitude, phase, h, w)
     # differential
-    dx = horizon.get_dx(nt_x, amplitude, phase)
+    dx = horizon.get_dx(nt_x, amplitude, phase, h, w)
 
     tangent_a = dx
     tangent_b = -nt_x*dx + fx
@@ -69,26 +68,42 @@ def get_intersection_x(a, b, y):
     x = (y - b) / a
     return x
 # get phase
-def get_phs(x, y, a):
-    width  = const.get_img_width()
-    height = const.get_img_height()
-    phs = math.atan2((math.pi*(y-height/2)),a * height) - (2*math.pi*x)/width
+def get_phs(x, y, a, h, w):
+    phs = math.atan2((math.pi * (y - h/2)), a * h) - (2*math.pi*x) / w
 
     return phs
 # get amplitude
-def get_amp(x, y, phs):
-    width  = const.get_img_width()
-    height = const.get_img_height()
+def get_amp(x, y, phs, h, w):
     amp = 0
-    if height*math.sin((2*math.pi*x)/width + phs) != 0:
-        amp = ((y-height/2)*math.pi)/(height*math.sin((2*math.pi*x)/width + phs))
+    if h *math.sin((2*math.pi*x) / w + phs) != 0:
+        amp = ((y - h/2) * math.pi) / (h * math.sin((2*math.pi*x) / w + phs))
 
     return amp
-# get phase and amplitude
-def get_phsamp(trapezoid_line, i, y):
-    width  = const.get_img_width()
-    height = const.get_img_height()
 
+# show midstream img
+def show_midstream_img(x1, y1, x2, y2, oy1, oy2, amp, phs, filename):
+    img = cv2.imread(filename, 1)
+    h = img.shape[0]
+    w = img.shape[1]
+
+    cv2.line(img, (x1,y1), (x2,y2), (0,0,255), 2)
+    cv2.line(img, (0,int(oy1)), (w,int(oy2)), (0,0,255), 2)
+    amp_rad = conv.get_rad(amp - 90)
+    phs_rad = conv.get_rad(phs - 180)
+    for x in range(0,w):
+        fx = h/math.pi * amp_rad * math.sin((2*math.pi*x / w + phs_rad)) + h/2
+        cv2.line(img, (x,int(fx-5)), (x,int(fx+5)), (0,255,00), 2)
+    while(1):
+        img = cv2.resize(img, (int(w/4), int(h/4)))
+        cv2.imshow("tangent line", img)
+        k = cv2.waitKey(1)
+        if k == 27: # ESC key finish while
+            break
+
+    return 0
+
+# get phase and amplitude
+def get_phsamp(trapezoid_line, i, y, h, w, filename):
     x1, y1, x2, y2 = list_opr.adaptation_value(trapezoid_line, i)
     a, b = linear.get_ab(x1, y1, x2, y2)
     # find tangent line (ort = tangent line)
@@ -100,92 +115,123 @@ def get_phsamp(trapezoid_line, i, y):
         ort_a = 0
         ort_b = y
         x = x1
-    phs = get_phs(x, y, ort_a)
-    amp = get_amp(x, y, phs)
+    phs = get_phs(x, y, ort_a, h, w)
+    amp = get_amp(x, y, phs, h, w)
     phs = round(conv.get_degree(phs) + 180)
     amp = round(conv.get_degree(amp) + 90)
-    oy1, oy2 = linear.slice_two_x(ort_a, ort_b, 0, width)
+    oy1, oy2 = linear.slice_two_x(ort_a, ort_b, 0, w)
 
-    '''
-    # show halfway image
-    filename = const.get_filename()
-    img_temp = cv2.imread(filename, 1)
-    cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
-    cv2.line(img_temp,(0,int(oy1)),(width,int(oy2)),(0,0,255),2)
-    for x in range(0,width):
-        fx = height/math.pi * conv.get_rad(amp-90) * math.sin((2*math.pi *x/width+conv.get_rad(phs-180))) + height/2
-        cv2.line(img_temp,(x,int(fx-5)),(x,int(fx+5)),(0,255,00),2)
-    while(1):
-        img_temp = cv2.resize(img_temp, (int(width/4), int(height/4)))
-        cv2.imshow("sessen", img_temp)
-        k = cv2.waitKey(1)
-        if k == 27: # ESC key finish while
-            break
-    '''
+    # show midstream image
+    #show_midstream_img(x1, y1, x2, y2, oy1, oy2, amp, phs, filename)
 
     return phs, amp
+
+# operation bin
+def operation_bin(v_bin, c_bin, temp_bin, len1, len2, color_interval):
+    for i in range(0, len1):
+        for j in range(0, len2):
+            if temp_bin[i][j] == 1:
+                v_bin[i][j] += 1
+                for ch in range(0,4):
+                    for cw in range(0,4):
+                        c_bin[i*4+ch][j*4+cw][0] += color_interval
+                        c_bin[i*4+ch][j*4+cw][1] += color_interval
+                        c_bin[i*4+ch][j*4+cw][2] += color_interval
+
+    return v_bin, c_bin
+
+# get max value in voting bin
+def get_bin_max(voting_bin):
+    voting_max_value = np.max(voting_bin)
+    voting_max = []
+    for i in range(0, len(voting_bin)):
+        for j in range(0, len(voting_bin[0])):
+            if voting_max_value == voting_bin[i][j]:
+                voting_max.append((i, j))
+    voting_dispersion = np.array([])
+    for i in range(0, len(voting_max)):
+        mean_i = voting_max[i][0]
+        mean_j = voting_max[i][1]
+        dispersion_sum = 0
+        for j in range(0, len(voting_max)):
+            a = (voting_max[j][0] - mean_i)
+            b = (voting_max[j][1] - mean_j)
+            dispersion_sum += a**2 + b**2
+        dispersion = dispersion_sum / len(voting_max)
+        voting_dispersion = np.append(voting_dispersion, dispersion)
+    dispersion_max_index = np.nanargmax(voting_dispersion)
+
+    max_i = voting_max[dispersion_max_index][0]
+    max_j = voting_max[dispersion_max_index][1]
+
+    return max_i, max_j
+
 # make voting space bin
-def make_voting_bin(trapezoid_line):
+def make_voting_bin(trapezoid_line, h, w, filename):
     # voting bin
     # one degree move
     phs_trans = 360
     amp_trans = 180
     voting_bin = [[0 for i in range(phs_trans)] for j in range(amp_trans)]
 
-    width  = const.get_img_width()
-    height = const.get_img_height()
+    # votin image array
+    voting_img = np.zeros((amp_trans * 4, phs_trans * 4,3), np.uint8)
+    color_interval = 255 / len(trapezoid_line)
 
     for i in range(0, len(trapezoid_line)):
-        for y in range(int(height*2/5), int(height*3/5)):
-            phs, amp = get_phsamp(trapezoid_line, i, y)
-            voting_bin[amp][phs] += 1
+        temp_voting_bin = [[0 for i in range(phs_trans)] for j in range(amp_trans)]
+        for y in range(int(h * 2/5), int(h * 3/5)):
+            phs, amp = get_phsamp(trapezoid_line, i, y, h, w, filename)
+            temp_voting_bin[amp][phs] = 1
+
+        voting_bin, voting_img = operation_bin(voting_bin, voting_img, temp_voting_bin, amp_trans, phs_trans, color_interval)
+
+    # show and save voting bin
+    plt.figure(figsize=(25,10))
+    plt.imshow(voting_img)
+    #plt.show()
+    #plt.savefig('voting_bin.png')
 
     # get max value in voting bin
-    voting_bin_max = np.max(voting_bin)
-    index_phs = np.array([])
-    index_amp = np.array([])
-    # find max value index
-    for phs_i in range(0, phs_trans):
-        for amp_i in range(0, amp_trans):
-            if voting_bin_max == voting_bin[amp_i][phs_i]:
-                index_phs = np.append(index_phs, phs_i)
-                index_amp = np.append(index_amp, amp_i)
-    # average of max value index
-    phs_i = index_phs.mean()
-    amp_i = index_amp.mean()
+    amp_i, phs_i = get_bin_max(voting_bin)
+
     # degree correction
     phs_ask = phs_i - 180
     amp_ask = amp_i - 90
 
     return phs_ask, amp_ask
 
-# approximation function
-def approximation_func(trapezoid_line):
-    width  = const.get_img_width()
-    height = const.get_img_height()
+# draw approximation horizon in image
+def draw_horizon(trapezoid_line, amp, phs, filename):
     # output array
     approximation_line = []
 
-    # phase and rotation angle of function
-    phase, amplitude = make_voting_bin(trapezoid_line)
-    amp_rad = conv.get_rad(amplitude)
-    phs_rad = conv.get_rad(phase)
-
+    amp_rad = conv.get_rad(amp)
+    phs_rad = conv.get_rad(phs)
     # make output image
-    filename = const.get_filename()
-    img_temp = cv2.imread(filename, 1)
+    img = cv2.imread(filename, 1)
+    h = img.shape[0]
+    w = img.shape[1]
     # approximation horizon
     for i in range(0,len(trapezoid_line)):
-        tangent_bool = tangent_angle(trapezoid_line, i, amp_rad, phs_rad)
+        tangent_bool = tangent_angle(trapezoid_line, i, amp_rad, phs_rad, h, w)
         if tangent_bool:
             x1, y1, x2, y2 = list_opr.adaptation_value(trapezoid_line, i)
-            approximation_line.append((x1,y1,x2,y2))
-            cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
+            approximation_line.append((x1, y1, x2, y2))
+            cv2.line(img, (x1,y1), (x2,y2), (0,0,255), 2)
 
-    for nt_x in range(0,width):
-        fx = horizon.get_fx(nt_x, amp_rad, phs_rad)
-        cv2.line(img_temp,(nt_x,int(fx-5)),(nt_x,int(fx+5)),(0,255,00),2)
+    for nt_x in range(0, w):
+        fx = horizon.get_fx(nt_x, amp_rad, phs_rad, h, w)
+        cv2.line(img, (nt_x,int(fx-5)), (nt_x,int(fx+5)), (0,255,00), 2)
 
-    cv2.imwrite("func.jpg", img_temp)
+    cv2.imwrite("func.jpg", img)
+
+# approximation function
+def approximation_func(trapezoid_line, height, width, filename):
+    # phase and rotation angle of function
+    phase, amplitude = make_voting_bin(trapezoid_line, height, width, filename)
+
+    # approximation horizon
+    draw_horizon(trapezoid_line, amplitude, phase, filename)
 
     return phase, amplitude

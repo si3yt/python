@@ -6,8 +6,6 @@ import numpy as np
 # create files
 import bicubic as bicubic
 import conversion as conv
-import constant as const
-
 
 def adaptation_value(result, rgb, h, w):
     result[h][w][0] = rgb[0]
@@ -16,12 +14,11 @@ def adaptation_value(result, rgb, h, w):
 
     return result
 
-def adaptation_pixel(matrix):
+def adaptation_pixel(matrix, filename):
     # result image array
-    filename = const.get_filename()
     img    = cv2.imread(filename, 1)
-    height = const.get_img_height()
-    width  = const.get_img_width()
+    height = img.shape[0]
+    width  = img.shape[1]
     result = np.zeros((height, width, 3), np.uint8)
 
     r = height / math.pi
