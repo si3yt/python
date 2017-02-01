@@ -20,7 +20,7 @@ import rgb_operation as rgb_opr
 if __name__ == "__main__":
     # read image
     print ('--- Program start ---')
-    filename = '../image/theta04_cor.jpg'
+    filename = '../image/R0010290.jpg'
 
     print ('Play exif rotate? Y or N')
     input_bool = input('>> ')
@@ -35,18 +35,17 @@ if __name__ == "__main__":
 
     print ('--- Start line detection ---')
     vertex_x, vertex_y = line.line_detection(img, filename)
-    transverse = conv.get_rad(vertex_x)
-    longitudinal = conv.get_rad(-vertex_y)
+    transverse = conv.get_rad(180 - vertex_x)
+    longitudinal = conv.get_rad(vertex_y)
     print ('=== End line detection ===')
 
     print ('--- Start make rotate matrix ---')
-    #matrix = rotate.rotate(transverse, 0, -longitudinal)
-    matrix = rotate.rerotate(transverse, longitudinal, 0)
+    x_matrix, y_matrix, z_matrix = rotate.double_rerotate(transverse, 0, longitudinal)
     print ('=== End make rotate matrix ===')
 
     print ('--- Start matrix rotate image ---')
     # result image array
-    result = rgb_opr.adaptation_pixel(matrix, filename)
+    result = rgb_opr.adaptation_pixel(x_matrix, y_matrix, z_matrix, filename)
     print ('=== End matrix rotate image ===')
 
     print ('|>  Show result image ')

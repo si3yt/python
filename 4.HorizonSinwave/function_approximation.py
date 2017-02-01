@@ -172,14 +172,14 @@ def make_voting_bin(trapezoid_line, h, w, filename):
     # one degree move
     phs_trans = 360
     amp_trans = 180
-    voting_bin = [[0 for i in range(phs_trans)] for j in range(amp_trans)]
+    voting_bin = [[0 for i in range(phs_trans+1)] for j in range(amp_trans+1)]
 
     # votin image array
     voting_img = np.zeros((amp_trans * 4, phs_trans * 4,3), np.uint8)
     color_interval = 255 / len(trapezoid_line)
 
     for i in range(0, len(trapezoid_line)):
-        temp_voting_bin = [[0 for i in range(phs_trans)] for j in range(amp_trans)]
+        temp_voting_bin = [[0 for i in range(phs_trans+1)] for j in range(amp_trans+1)]
         for y in range(int(h * 2/5), int(h * 3/5)):
             phs, amp = get_phsamp(trapezoid_line, i, y, h, w, filename)
             temp_voting_bin[amp][phs] = 1
@@ -190,7 +190,7 @@ def make_voting_bin(trapezoid_line, h, w, filename):
     plt.figure(figsize=(25,10))
     plt.imshow(voting_img)
     #plt.show()
-    #plt.savefig('voting_bin.png')
+    plt.savefig('voting_bin.png')
 
     # get max value in voting bin
     amp_i, phs_i = get_bin_max(voting_bin)
@@ -213,16 +213,16 @@ def draw_horizon(trapezoid_line, amp, phs, filename):
     h = img.shape[0]
     w = img.shape[1]
     # approximation horizon
-    for i in range(0,len(trapezoid_line)):
-        tangent_bool = tangent_angle(trapezoid_line, i, amp_rad, phs_rad, h, w)
-        if tangent_bool:
-            x1, y1, x2, y2 = list_opr.adaptation_value(trapezoid_line, i)
-            approximation_line.append((x1, y1, x2, y2))
-            cv2.line(img, (x1,y1), (x2,y2), (0,0,255), 2)
+    #for i in range(0,len(trapezoid_line)):
+        #tangent_bool = tangent_angle(trapezoid_line, i, amp_rad, phs_rad, h, w)
+        #if tangent_bool:
+            #x1, y1, x2, y2 = list_opr.adaptation_value(trapezoid_line, i)
+            #approximation_line.append((x1, y1, x2, y2))
+            #cv2.line(img, (x1,y1), (x2,y2), (0,0,255), 2)
 
     for nt_x in range(0, w):
         fx = horizon.get_fx(nt_x, amp_rad, phs_rad, h, w)
-        cv2.line(img, (nt_x,int(fx-5)), (nt_x,int(fx+5)), (0,255,00), 2)
+        cv2.line(img, (nt_x,int(fx-20)), (nt_x,int(fx+20)), (255,255,255), 2)
 
     cv2.imwrite("func.jpg", img)
 

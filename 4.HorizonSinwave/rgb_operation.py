@@ -14,7 +14,7 @@ def adaptation_value(result, rgb, h, w):
 
     return result
 
-def adaptation_pixel(matrix, filename):
+def adaptation_pixel(x_matrix, y_matrix, z_matrix, filename):
     # result image array
     img    = cv2.imread(filename, 1)
     height = img.shape[0]
@@ -31,7 +31,9 @@ def adaptation_pixel(matrix, filename):
             # polar → xyz
             x, y, z = conv.get_xyz(r, sphere_lat_rad, sphere_lon_rad)
             # xyz → rotated xyz
-            new_x, new_y, new_z = conv.get_after_xyz(x, y, z, matrix)
+            xnew_x, xnew_y, xnew_z = conv.get_after_xyz(x, y, z, x_matrix)
+            ynew_x, ynew_y, ynew_z = conv.get_after_xyz(xnew_x, xnew_y, xnew_z, y_matrix)
+            new_x, new_y, new_z = conv.get_after_xyz(ynew_x, ynew_y, ynew_z, z_matrix)
             # rotated xyz → polar
             distance, theta, phi = conv.get_polar(new_x, new_y, new_z)
             if phi < 0:
@@ -43,7 +45,7 @@ def adaptation_pixel(matrix, filename):
             # bicubic interpolation
             rgb = bicubic.bicubic(cylinder_x, cylinder_y, img, height, width)
             # adaptation value of rgb
-            adaptation_value(result, rgb, h, w)
+            result = adaptation_value(result, rgb, h, w)
 
         print ('|>  Now image height : %4d / %d' % (h ,height))
 

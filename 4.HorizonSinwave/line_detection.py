@@ -14,7 +14,7 @@ def output_img(line, filename):
     img_temp = cv2.imread(filename, 1)
     for i in range(0,len(line)):
         x1, y1, x2, y2 = list_opr.adaptation_value(line, i)
-        cv2.line(img_temp,(x1,y1),(x2,y2),(0,0,255),2)
+        cv2.line(img_temp,(x1,y1),(x2,y2),(255,255,255),20)
     return img_temp
 
 # line function
@@ -22,7 +22,7 @@ def line_detection(img, filename):
     height = img.shape[0]
     width = img.shape[1]
 
-    print ('-- Start hough conversion ---')
+    print ('-- Start hough conversion --')
     # hough conversion
     # angle narrowing down
     degree_line = hough.hough_lines(img)

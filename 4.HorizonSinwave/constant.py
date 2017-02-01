@@ -22,7 +22,7 @@ def get_slice_line_bottom():
     return slice_line_bottom
 
 def get_trapezoid_threshold():
-    trapezoid_threshold = 100000
+    trapezoid_threshold = 50000
     return trapezoid_threshold
 
 def get_dense_threshold():
