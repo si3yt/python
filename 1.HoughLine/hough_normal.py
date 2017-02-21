@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 
-img = cv2.imread('../image/theta04_cor.jpg')
+img = cv2.imread('../image/grid_small.jpg')
 height = img.shape[0]
 width = img.shape[1]
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -36,8 +36,7 @@ for i in range(0,len(lines)):
 
         degree = theta * 180 / math.pi
 
-        if degree < degree_range or degree > 180-degree_range:
-            line_xyd.append((x1,y1,x2,y2,degree))
+        line_xyd.append((x1,y1,x2,y2,degree))
 
 for i in range(0,len(line_xyd)):
     x1 = line_xyd[i][0]
@@ -48,7 +47,7 @@ for i in range(0,len(line_xyd)):
     cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
 
 while(1):
-    img = cv2.resize(img, (int(width/4), int(height/4)))
+    #img = cv2.resize(img, (int(width/4), int(height/4)))
     cv2.imshow("sphere_rotate", img)
     k = cv2.waitKey(1)
     if k == 27: # ESCキーで終了

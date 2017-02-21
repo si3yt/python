@@ -117,8 +117,22 @@ def get_phsamp(trapezoid_line, i, y, h, w, filename):
         x = x1
     phs = get_phs(x, y, ort_a, h, w)
     amp = get_amp(x, y, phs, h, w)
-    phs = round(conv.get_degree(phs) + 180)
-    amp = round(conv.get_degree(amp) + 90)
+    amp_p = conv.get_degree(amp)
+    if amp_p < 0:
+        amp_p = -amp_p
+        if conv.get_degree(phs) < 0:
+            phs = round(conv.get_degree(phs) + 360)
+        else:
+            phs = round(conv.get_degree(phs))
+    else:
+        phs = round(conv.get_degree(phs) + 180)
+    amp = round(amp_p + 90)
+    if amp > 180:
+        amp -= 180
+    if phs > 360:
+        phs -= 360
+    if phs < 0:
+        phs += 360
     oy1, oy2 = linear.slice_two_x(ort_a, ort_b, 0, w)
 
     # show midstream image
