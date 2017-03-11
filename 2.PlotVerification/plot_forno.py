@@ -25,7 +25,10 @@ for angle in [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]:
 
 plt.xlim(-10, width+10)
 plt.ylim(height+10, -10)
+plt.xlabel("x [pixel]")
+plt.ylabel("y [pixel]")
+plt.rcParams["font.size"] = 25
 
-plt.show()
+#plt.show()
 
-#plt.savefig('output.png')
+plt.savefig('output.png')

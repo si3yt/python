@@ -203,6 +203,11 @@ def make_voting_bin(trapezoid_line, h, w, filename):
     # show and save voting bin
     plt.figure(figsize=(25,10))
     plt.imshow(voting_img)
+    plt.xticks([0,360,720,1080,1440], [-180,-90,0,90,180])
+    plt.yticks([0,180,360,540,720], [-90,-45,0,45,90])
+    plt.xlabel("phase [degree]")
+    plt.ylabel("amplitude [degree]")
+    plt.rcParams["font.size"] = 15
     #plt.show()
     plt.savefig('voting_bin.png')
 
